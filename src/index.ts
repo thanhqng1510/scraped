@@ -1,4 +1,4 @@
-import 'dotenv/config'; // Make sure to load env variables
+import { env } from './env';
 import express from 'express';
 import { authMiddleware } from './middleware/auth';
 
@@ -19,5 +19,5 @@ app.get('/api/v1/me', authMiddleware, (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 });
