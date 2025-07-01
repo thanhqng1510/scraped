@@ -1,45 +1,49 @@
 import { Request, Response, NextFunction } from 'express';
 import admin from 'firebase-admin';
-import { PrismaClient } from '@prisma/client';
-
-// You need to download this file from your Firebase project settings
-// and place it in the root directory.
+import prisma from '../lib/prisma';
 import serviceAccount from '../../firebase-service-account.json';
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert({
+    projectId: serviceAccount.project_id,
+    privateKey: serviceAccount.private_key,
+    clientEmail: serviceAccount.client_email
+  }),
 });
 
-const prisma = new PrismaClient();
+export const verifyFirebaseTokenAndUpsertUser = async (idToken: string) => {
+  const decodedToken = await admin.auth().verifyIdToken(idToken);
+  const firebaseUid = decodedToken.uid;
 
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  // Find user in our DB or create one if they don't exist (upsert)
+  const user = await prisma.user.upsert({
+    where: { firebaseUid },
+    update: {},
+    create: {
+      firebaseUid,
+      email: decodedToken.email!,
+    },
+  });
+  return user;
+};
+
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).send('Unauthorized: No token provided');
+    res.status(401).send('Unauthorized: No token provided');
+    return;
   }
 
   const idToken = authHeader.split('Bearer ')[1];
 
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const firebaseUid = decodedToken.uid;
-
-    // Find user in our DB or create one if they don't exist (upsert)
-    const user = await prisma.user.upsert({
-      where: { firebaseUid },
-      update: {},
-      create: {
-        firebaseUid,
-        email: decodedToken.email!,
-      },
-    });
-
-    req.user = user;
+    req.user = await verifyFirebaseTokenAndUpsertUser(idToken);
     next();
   } catch (error) {
     console.error('Error verifying auth token:', error);
-    return res.status(403).send('Unauthorized: Invalid token');
+    res.status(403).send('Unauthorized: Invalid token');
+    return;
   }
 };
 
