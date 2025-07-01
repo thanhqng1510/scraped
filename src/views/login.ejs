@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login</title>
+</head>
+
+<body>
+  <h1>Login / Sign Up</h1>
+
+  <form id="authForm">
+    <label for="email">Email:</label>
+    <input type="email" id="email" required><br><br>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" required><br><br>
+
+    <button type="button" id="loginButton">Login</button>
+    <button type="button" id="signupButton">Sign Up</button>
+  </form>
+
+  <p id="errorMessage" style="color: red;"></p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js"
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyANj0qvGGTtTC3XenZ3HGhNebIepw1kyjY",
+      authDomain: "scraped-8b8d7.firebaseapp.com",
+      projectId: "scraped-8b8d7",
+      storageBucket: "scraped-8b8d7.firebasestorage.app",
+      messagingSenderId: "427841229827",
+      appId: "1:427841229827:web:f65822c0373aca8c886a36"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginButton = document.getElementById('loginButton');
+    const signupButton = document.getElementById('signupButton');
+    const errorMessage = document.getElementById('errorMessage');
+
+    loginButton.addEventListener('click', async () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const idToken = await userCredential.user.getIdToken();
+        
+        // Send ID token to your backend for session management or verification
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ idToken })
+        });
+
+        if (response.ok) {
+          window.location.href = '/';
+        } else {
+          const errorData = await response.json();
+          errorMessage.textContent = errorData.message || 'Authentication failed on backend.';
+        }
+      } catch (error) {
+        errorMessage.textContent = error.message;
+        console.error("Login error:", error);
+      }
+    });
+
+    signupButton.addEventListener('click', async () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const idToken = await userCredential.user.getIdToken();
+        
+        // Send ID token to your backend for session management or verification
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ idToken })
+        });
+
+        if (response.ok) {
+          window.location.href = '/';
+        } else {
+          const errorData = await response.json();
+          errorMessage.textContent = errorData.message || 'Authentication failed on backend.';
+        }
+      } catch (error) {
+        errorMessage.textContent = error.message;
+        console.error("Sign up error:", error);
+      }
+    });
+  </script>
+</body>
+
+</html>
