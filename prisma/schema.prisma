@@ -21,12 +21,12 @@ model User {
 }
 
 model ApiKey {
-  id        String   @id @default(cuid())
-  key       String   @unique @default(cuid()) // Using cuid for simplicity, consider a more robust key generation
+  id        String    @id @default(cuid())
+  key       String    @unique @default(cuid()) // Using cuid for simplicity, consider a more robust key generation
   name      String
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
   revokedAt DateTime?
 }
 
