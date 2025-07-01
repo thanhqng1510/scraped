@@ -1,0 +1,37 @@
+{
+  "name": "scraped",
+  "version": "1.0.0",
+  "description": "Bing Search Scraper web application.",
+  "homepage": "https://github.com/thanhqng1510/scraped#readme",
+  "bugs": {
+    "url": "https://github.com/thanhqng1510/scraped/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thanhqng1510/scraped.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.10.1",
+    "bullmq": "^5.56.0",
+    "dotenv": "^17.0.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.4.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.8",
+    "prisma": "^6.10.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3",
+    "zod": "^3.25.67"
+  }
+}

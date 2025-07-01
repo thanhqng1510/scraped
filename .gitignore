@@ -1,1 +1,17 @@
 mise.toml
+
+# Environment variables
+.env
+
+# Firebase service account key
+firebase-service-account.json
+
+# Node
+node_modules
+dist
+
+# Prisma
+/src/generated/prisma
+
+to_consider
+PLAN.md
