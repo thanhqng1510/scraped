@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
-import serviceAccount from '../../firebase-service-account.json';
-import prisma from '../lib/prisma';
+import serviceAccount from '../firebase-service-account.json';
+import prisma from './prisma';
 
 admin.initializeApp({
   credential: admin.credential.cert({

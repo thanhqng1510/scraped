@@ -1,26 +1,12 @@
 import { env } from './env';
-import express from 'express';
-import { authMiddleware } from './middleware/auth';
+import express, { json } from 'express';
 import jwt from 'jsonwebtoken';
 import { verifyFirebaseTokenAndUpsertUser } from './lib/firebase';
 
 const app = express();
 const port = env.PORT;
 
-app.set('view engine', 'ejs');
-app.set('views', 'src/views');
-
-app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.send('Hello, Scraper!');
-  // TODO: homepage, redirect to login page if not login
-});
-
-app.get('/login', (req, res) => {
-  res.render('login');
-  // TODO: redirect to homepage if logged in
-});
+app.use(json())
 
 app.post('/login', async (req, res) => {
   const idToken = req.body.idToken;
@@ -40,11 +26,9 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Protected route to test authentication
-app.get('/api/v1/me', authMiddleware, (req, res) => {
-  // If the request reaches here, the token is valid.
-  // The user object is attached to the request by the middleware.
-  res.json(req.user);
+// Default 404
+app.use((req, res) => {
+  res.status(404).send('Not Found');
 });
 
 app.listen(port, () => {
