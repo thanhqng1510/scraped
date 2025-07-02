@@ -5,3 +5,4 @@
   <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
   <button (click)="logout()">Logout</button>
 </div>
+<app-loading *ngIf="isLoading"></app-loading>

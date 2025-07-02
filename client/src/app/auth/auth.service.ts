@@ -86,4 +86,10 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem('jwtToken');
   }
+
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    // You might want to add more robust token validation here (e.g., check expiration)
+    return !!token;
+  }
 }
