@@ -1,29 +1,85 @@
-import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 import { firstValueFrom } from 'rxjs';
 import { LoadingComponent } from '../loading/loading';
+import { Keyword, KeywordService } from '../services/keyword.service';
+import { OnInit, OnDestroy, Component } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { trigger, style, animate, transition, query, stagger } from '@angular/animations';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, LoadingComponent],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss'
+  styleUrl: './dashboard.scss',
+  animations: [
+    trigger('listAnimation', [
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(-20px)' }),
+          stagger('50ms', [
+            animate('300ms ease-out', style({ opacity: 1, transform: 'none' }))
+          ])
+        ], { optional: true }),
+        query(':leave', [
+          animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(20px)' }))
+        ], { optional: true })
+      ])
+    ])
+  ]
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   selectedFile: File | null = null;
-  fileInput: HTMLInputElement | null = null;
   uploadMessage: string | null = null;
+  fileInput: HTMLInputElement | null = null;
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  keywords: Keyword[] = [];
+  currentPage: number = 1;
+  totalPages: number = 1;
+  totalKeywords: number = 0;
+  limit: number = 10;
 
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0] || null;
-    this.fileInput = event.target;
-    this.uploadMessage = null;
+  private keywordSubscription: Subscription | undefined;
+
+  constructor(private http: HttpClient, private authService: AuthService, private keywordService: KeywordService) { }
+
+  ngOnInit(): void {
+    this.keywordSubscription = this.keywordService.keywords$.subscribe(response => {
+      if (response) {
+        this.keywords = [];
+        setTimeout(() => { this.keywords = response.data; }, 50);
+
+        this.currentPage = response.pagination.page;
+        this.totalPages = response.pagination.totalPages;
+        this.totalKeywords = response.pagination.total;
+        this.isLoading = false;
+      }
+    });
+
+    this.keywordService.loadKeywords(this.currentPage, this.limit);
+  }
+
+  ngOnDestroy(): void {
+    this.keywordSubscription?.unsubscribe();
+  }
+
+  loadKeywords() {
+    this.isLoading = true;
+    this.keywordService.loadKeywords(this.currentPage, this.limit);
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.keywordService.loadKeywords(this.currentPage, this.limit);
+    }
+  }
+
+  get pages(): number[] {
+    return Array(this.totalPages).fill(0).map((_, i) => i + 1);
   }
 
   async uploadFile() {
@@ -44,13 +100,19 @@ export class DashboardComponent {
       if (this.fileInput) {
         this.fileInput.value = ''; // Clear the file input
       }
-      // Optionally, refresh keyword list here later
+      
+      this.keywordService.refreshKeywords(); // Refresh keyword list after upload
     } catch (error: any) {
       this.uploadMessage = `Upload failed: ${error.error.message || error.message}`;
-      console.error('Upload error:', error);
     } finally {
       this.isLoading = false;
     }
+  }
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0] || null;
+    this.fileInput = event.target;
+    this.uploadMessage = null;
   }
 
   logout() {
