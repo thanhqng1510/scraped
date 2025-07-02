@@ -15,12 +15,14 @@ import { LoadingComponent } from '../loading/loading';
 export class DashboardComponent {
   isLoading: boolean = false;
   selectedFile: File | null = null;
+  fileInput: HTMLInputElement | null = null;
   uploadMessage: string | null = null;
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0] || null;
+    this.fileInput = event.target;
     this.uploadMessage = null;
   }
 
@@ -38,7 +40,10 @@ export class DashboardComponent {
     try {
       const response: any = await firstValueFrom(this.http.post('/api/v1/keywords/upload', formData));
       this.uploadMessage = `Upload successful: ${response.count} keywords processed.`;
-      this.selectedFile = null; // Clear selected file after successful upload
+      this.selectedFile = null;
+      if (this.fileInput) {
+        this.fileInput.value = ''; // Clear the file input
+      }
       // Optionally, refresh keyword list here later
     } catch (error: any) {
       this.uploadMessage = `Upload failed: ${error.error.message || error.message}`;

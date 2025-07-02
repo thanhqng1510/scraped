@@ -15,9 +15,11 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only index.ts",
+    "dev": "concurrently \"ts-node-dev --respawn --transpile-only index.ts\" \"npm run worker:dev\"",
     "build": "tsc",
-    "start": "npm run build && node dist/index.js"
+    "start": "concurrently \"node dist/index.js\" \"npm run worker:start\"",
+    "worker:dev": "ts-node-dev --respawn --transpile-only worker/worker.ts",
+    "worker:start": "node dist/worker/worker.js"
   },
   "dependencies": {
     "@prisma/client": "^6.10.1",
@@ -35,6 +37,7 @@
     "@types/express": "^5.0.3",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.0.8",
+    "concurrently": "^9.2.0",
     "prisma": "^6.10.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3",
