@@ -61,7 +61,50 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     // Enqueue jobs in the background without awaiting to prevent request timeouts
     enqueueScrapingJobs(createdKeywords.map(k => k.id));
   } catch (error) {
-    console.error('Error uploading keywords:', error);
+    console.error('Error processing CSV file.', error);
     res.status(500).send('Error processing CSV file.');
+  }
+};
+
+export const getKeywordsCtrl = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id; // Assuming req.user is populated by authMiddleware
+    if (!userId) {
+      res.status(401).send('Unauthorized: User not found.');
+      return;
+    }
+
+    let page = parseInt(req.query.page as string) || 1;
+    page = Math.max(page, 1);
+
+    let limit = parseInt(req.query.limit as string) || 20;
+    limit = Math.max(limit, 1);
+    limit = Math.min(limit, 20);
+
+    const skip = (page - 1) * limit;
+
+    const keywords = await prisma.keyword.findMany({
+      where: { userId },
+      skip: skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' }, // Order by creation date, newest first
+    });
+
+    const totalKeywords = await prisma.keyword.count({
+      where: { userId },
+    });
+
+    res.status(200).json({
+      data: keywords,
+      pagination: {
+        total: totalKeywords,
+        page: page,
+        limit: limit,
+        totalPages: Math.ceil(totalKeywords / limit),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching keywords:', error);
+    res.status(500).send('Error fetching keywords.');
   }
 };
