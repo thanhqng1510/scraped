@@ -33,6 +33,11 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
       return;
     }
 
+    if (keywords.length > 100) {
+      res.status(400).send('CSV file contains too many keywords. Maximum allowed is 100.');
+      return;
+    }
+
     // Associate keywords with the authenticated user
     const userId = req.user?.id; // Assuming req.user is populated by authMiddleware
     if (!userId) {
