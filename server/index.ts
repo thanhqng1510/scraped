@@ -1,7 +1,8 @@
 import { env } from './env';
 import express, { json } from 'express';
 import jwt from 'jsonwebtoken';
-import { verifyFirebaseTokenAndUpsertUser } from './lib/firebase';
+import { verifyFirebaseToken } from './lib/firebase';
+import prisma from './lib/prisma';
 
 const app = express();
 const port = env.PORT;
@@ -17,7 +18,19 @@ app.post('/login', async (req, res) => {
   }
 
   try {
-    const user = await verifyFirebaseTokenAndUpsertUser(idToken);
+    const decodedToken = await verifyFirebaseToken(idToken);
+    const firebaseUid = decodedToken.uid;
+
+    // Find user in our DB or create one if they don't exist (upsert)
+    const user = await prisma.user.upsert({
+      where: { firebaseUid },
+      update: {},
+      create: {
+        firebaseUid,
+        email: decodedToken.email!,
+      },
+    });
+
     const token = jwt.sign({ uid: user.firebaseUid, email: user.email }, env.JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: 'Authentication successful', token });
   } catch (error) {

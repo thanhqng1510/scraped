@@ -1,6 +1,6 @@
 # Project: Bing Search Scraper
 
-This document outlines the plan, architecture, and technical details for the Bing Search Scraper web application.
+This document describes the plan, architecture, and technical details for the Bing Search Scraper web application.
 
 ## 1. Overview
 
@@ -32,9 +32,10 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
 
 1.  **Web Server (Node.js/Express):** A Node.js application using the Express.js framework serves as the main entry point. It handles:
     *   Verifying user identity by validating Firebase ID Tokens.
-    *   Serving all front-end assets (HTML, CSS, JS).
     *   Handling the CSV file upload.
     *   Providing the API endpoints to the front end for fetching keyword and result data.
+
+2.  **Web UI (Angular):** A single page application using Angular, communicating with the backend solely via API.
 
 2.  **Background Job Processor (BullMQ & Redis):** To prevent the scraping process from blocking web requests and to handle processing immediately, I use BullMQ.
     *   When a user uploads a CSV, the Express app will parse it and enqueue one background job per keyword.
@@ -81,7 +82,7 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
 | - | - |
 | Backend | Node.js, Typescript, Express |
 | ORM | Prisma |
-| Frontend | EJS (Templating), Bootstrap, SASS |
+| Frontend | Angular, SCSS |
 | Database | PostgreSQL |
 | Async Jobs | BullMQ and Redis |
 | Authentication | Firebase Authentication |

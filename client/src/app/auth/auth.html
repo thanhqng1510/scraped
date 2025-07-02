@@ -10,9 +10,10 @@
       <input type="password" id="password" [(ngModel)]="password" name="password" required>
     </div>
     <div class="button-group">
-      <button type="button" (click)="onLogin()">Login</button>
-      <button type="button" (click)="onSignup()">Sign Up</button>
+      <button type="button" (click)="onLogin()" [disabled]="isLoading">Login</button>
+      <button type="button" (click)="onSignup()" [disabled]="isLoading">Sign Up</button>
     </div>
     <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
   </form>
+  <app-loading *ngIf="isLoading"></app-loading>
 </div>

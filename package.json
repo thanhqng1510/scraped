@@ -15,14 +15,16 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "install:client": "npm install --prefix client",
     "install:server": "npm install --prefix server",
-    "install:all": "npm run install:client && npm run install:server",
+    "install:all": "concurrently \"npm run install:client\" \"npm run install:server\"",
     "dev:client": "npm start --prefix client",
     "dev:server": "npm run dev --prefix server",
     "dev:all": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
-    "build:client": "npm run build --prefix client"
+    "build:client": "npm run build --prefix client",
+    "build:server": "npm run build --prefix server",
+    "build:all": "concurrently \"npm run build:client\" \"npm run build:server\"",
+    "start:server": "npm run start --prefix server"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
