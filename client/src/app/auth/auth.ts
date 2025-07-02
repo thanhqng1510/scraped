@@ -1,0 +1,50 @@
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { LoadingComponent } from '../loading/loading';
+import { AuthService } from './auth.service';
+
+@Component({
+  selector: 'app-auth',
+  standalone: true,
+  imports: [FormsModule, CommonModule, LoadingComponent],
+  templateUrl: './auth.html',
+  styleUrl: './auth.scss'
+})
+export class AuthComponent {
+  email!: string;
+  password!: string;
+  errorMessage: string | null = null;
+  isLoading: boolean = false;
+
+  constructor(private authService: AuthService, private router: Router) { }
+
+  async onLogin() {
+    this.isLoading = true;
+    this.errorMessage = null;
+    try {
+      await this.authService.login(this.email, this.password);
+      this.router.navigate(['/dashboard']);
+    } catch (error: any) {
+      this.errorMessage = error.message;
+      console.error("Login error:", error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async onSignup() {
+    this.isLoading = true;
+    this.errorMessage = null;
+    try {
+      await this.authService.signup(this.email, this.password);
+      this.router.navigate(['/dashboard']);
+    } catch (error: any) {
+      this.errorMessage = error.message;
+      console.error("Sign up error:", error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+}

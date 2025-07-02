@@ -4,7 +4,7 @@
     "moduleResolution": "node",
     "lib": ["ESNext"],
     "module": "commonjs",
-    "rootDir": "src",
+    "rootDir": ".",
     "resolveJsonModule": true,
     "outDir": "dist",
     "esModuleInterop": true,
