@@ -13,5 +13,4 @@ dist
 # Prisma
 /src/generated/prisma
 
-to_consider
-PLAN.md
+tmp

@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 import { firstValueFrom } from 'rxjs';
@@ -13,31 +12,37 @@ import { LoadingComponent } from '../loading/loading';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class DashboardComponent implements OnInit {
-  userData: any = null;
-  errorMessage: string | null = null;
+export class DashboardComponent {
   isLoading: boolean = false;
+  selectedFile: File | null = null;
+  uploadMessage: string | null = null;
 
-  constructor(private http: HttpClient, private authService: AuthService, private router: Router) { }
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
-  ngOnInit(): void {
-    this.fetchUserData();
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0] || null;
+    this.uploadMessage = null;
   }
 
-  async fetchUserData() {
-    if (!this.authService.getToken()) {
-      this.errorMessage = 'No JWT token found. Please log in.';
-      this.router.navigate(['/login']);
+  async uploadFile() {
+    if (!this.selectedFile) {
+      this.uploadMessage = 'Please select a file first.';
       return;
     }
 
     this.isLoading = true;
-    this.errorMessage = null;
+    this.uploadMessage = null;
+    const formData = new FormData();
+    formData.append('keywords_file', this.selectedFile, this.selectedFile.name);
+
     try {
-      this.userData = await firstValueFrom(this.http.get('/api/v1/me'));
+      const response: any = await firstValueFrom(this.http.post('/api/v1/keywords/upload', formData));
+      this.uploadMessage = `Upload successful: ${response.count} keywords processed.`;
+      this.selectedFile = null; // Clear selected file after successful upload
+      // Optionally, refresh keyword list here later
     } catch (error: any) {
-      this.errorMessage = error.message || 'Error fetching user data.';
-      console.error('Error fetching user data:', error);
+      this.uploadMessage = `Upload failed: ${error.error.message || error.message}`;
+      console.error('Upload error:', error);
     } finally {
       this.isLoading = false;
     }
