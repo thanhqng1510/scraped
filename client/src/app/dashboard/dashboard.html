@@ -1,8 +1,13 @@
 <div class="dashboard-container">
   <h2>Dashboard</h2>
-  <p>Welcome! Here's your user data:</p>
-  <pre *ngIf="userData">{{ userData | json }}</pre>
-  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <div class="upload-section">
+    <h3>Upload Keywords CSV</h3>
+    <input type="file" (change)="onFileSelected($event)" accept=".csv" />
+    <button (click)="uploadFile()" [disabled]="!selectedFile || isLoading">Upload CSV</button>
+    <p *ngIf="uploadMessage">{{ uploadMessage }}</p>
+  </div>
+
   <button (click)="logout()">Logout</button>
 </div>
 <app-loading *ngIf="isLoading"></app-loading>
