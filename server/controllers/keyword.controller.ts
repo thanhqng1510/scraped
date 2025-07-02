@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
 import prisma from '../lib/prisma';
-import { scrapeQueue } from '../lib/queue';
+import { enqueueScrapingJobs } from '../services/job.service';
 
 export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
   if (!req.file) {
@@ -59,13 +59,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     res.status(202).json({ message: 'Keywords accepted for processing', count: createdKeywords.length });
 
     // Enqueue jobs in the background without awaiting to prevent request timeouts
-    Promise.all(
-      createdKeywords.map((keywordRecord) =>
-        scrapeQueue.add('scrape', { keywordId: keywordRecord.id })
-      )
-    ).catch((error) => {
-      console.error('Error enqueuing scraping jobs:', error);
-    });
+    enqueueScrapingJobs(createdKeywords.map(k => k.id));
   } catch (error) {
     console.error('Error uploading keywords:', error);
     res.status(500).send('Error processing CSV file.');
