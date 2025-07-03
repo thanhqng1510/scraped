@@ -142,3 +142,34 @@
   background-color: #0056b3;
   font-weight: bold;
 }
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-badge.pending {
+  background-color: #ffc107; /* Yellow */
+}
+
+.status-badge.in_progress {
+  background-color: #17a2b8; /* Cyan/Blue */
+}
+
+.status-badge.completed {
+  background-color: #28a745; /* Green */
+}
+
+.status-badge.failed {
+  background-color: #dc3545; /* Red */
+}
+   
+.status-badge.default {
+  background-color: #6c757d; /* Gray */
+}
