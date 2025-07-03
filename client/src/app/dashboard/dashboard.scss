@@ -1,9 +1,13 @@
+@use '../../styles/variables' as var;
+@use '../../styles/base' as base;
+@use "sass:color";
+
 .dashboard-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  padding: var.$spacing-md;
+  font-family: var.$font-family-sans-serif;
 }
 
 .header {
@@ -12,28 +16,28 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: var.$spacing-lg;
 }
 
 .header h1 {
-  color: #333;
+  color: var.$dark-gray;
   font-size: 2.5em;
 }
 
 .upload-section {
   display: flex;
-  gap: 10px;
+  gap: var.$spacing-sm;
   align-items: center;
 }
 
 .upload-section input[type="file"] {
-  border: 1px solid #ccc;
+  border: 1px solid var.$border-color;
   padding: 8px;
   border-radius: 5px;
 }
 
 .upload-section button {
-  background-color: #007bff;
+  background-color: var.$primary-color;
   color: white;
   padding: 10px 15px;
   border: none;
@@ -41,24 +45,24 @@
   cursor: pointer;
   font-size: 1em;
   transition: background-color 0.3s ease;
-}
 
-.upload-section button:hover:not([disabled]) {
-  background-color: #0056b3;
-}
+  &:hover:not([disabled]) {
+    background-color: var.$primary-color-dark;
+  }
 
-.upload-section button[disabled] {
-  background-color: #cccccc;
-  cursor: not-allowed;
+  &[disabled] {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
 }
 
 .upload-message {
-  margin-top: 10px;
-  padding: 10px;
+  margin-top: var.$spacing-sm;
+  padding: var.$spacing-sm;
   border-radius: 5px;
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background-color: color.adjust(var.$success-color, $lightness: 30%);
+  color: color.adjust(var.$success-color, $lightness: -20%);
+  border: 1px solid color.adjust(var.$success-color, $lightness: 20%);
   width: 100%;
   max-width: 900px;
   text-align: center;
@@ -67,49 +71,47 @@
 .keyword-list-container {
   width: 100%;
   max-width: 900px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  @extend %card; // Use the global card style
+  padding: var.$spacing-md;
 }
 
 .keyword-list-container h2 {
   text-align: center;
-  color: #333;
-  margin-bottom: 20px;
+  color: var.$dark-gray;
+  margin-bottom: var.$spacing-md;
 }
 
 .keyword-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
-}
+  margin-bottom: var.$spacing-md;
 
-.keyword-table th,
-.keyword-table td {
-  border: 1px solid #ddd;
-  padding: 12px;
-  text-align: left;
-}
+  th,
+  td {
+    border: 1px solid var.$border-color;
+    padding: 12px;
+    text-align: left;
+  }
 
-.keyword-table th {
-  background-color: #e9ecef;
-  color: #555;
-  font-weight: bold;
-}
+  th {
+    background-color: var.$medium-gray;
+    color: var.$text-color;
+    font-weight: bold;
+  }
 
-.keyword-table tbody tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
+  tbody tr:nth-child(even) {
+    background-color: var.$light-gray;
+  }
 
-.keyword-table tbody tr:hover {
-  background-color: #e2e6ea;
+  tbody tr:hover {
+    background-color: color.adjust(var.$border-color, $lightness: 5%);
+  }
 }
 
 .no-keywords {
   text-align: center;
   font-style: italic;
-  color: #777;
+  color: var.$text-color;
 }
 
 .pagination {
@@ -117,59 +119,28 @@
   justify-content: center;
   align-items: center;
   gap: 5px;
-}
 
-.pagination button {
-  background-color: #007bff;
-  color: white;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+  button {
+    background-color: var.$primary-color;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 
-.pagination button:hover:not([disabled]) {
-  background-color: #0056b3;
-}
+    &:hover:not([disabled]) {
+      background-color: var.$primary-color-dark;
+    }
 
-.pagination button[disabled] {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
+    &[disabled] {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
 
-.pagination button.active {
-  background-color: #0056b3;
-  font-weight: bold;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.8em;
-  font-weight: bold;
-  color: white;
-  text-align: center;
-  min-width: 80px;
-}
-
-.status-badge.pending {
-  background-color: #ffc107; /* Yellow */
-}
-
-.status-badge.in_progress {
-  background-color: #17a2b8; /* Cyan/Blue */
-}
-
-.status-badge.completed, .status-badge.success {
-  background-color: #28a745; /* Green */
-}
-
-.status-badge.failed {
-  background-color: #dc3545; /* Red */
-}
-   
-.status-badge.default {
-  background-color: #6c757d; /* Gray */
+    &.active {
+      background-color: var.$primary-color-dark;
+      font-weight: bold;
+    }
+  }
 }

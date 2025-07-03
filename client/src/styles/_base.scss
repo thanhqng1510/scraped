@@ -1,0 +1,56 @@
+@use './variables' as var;
+
+body {
+  margin: 0;
+  font-family: var.$font-family-sans-serif;
+  color: var.$dark-gray;
+  background-color: #f4f7f9; // A light background for the whole app
+}
+
+// Global utility classes
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var.$spacing-md;
+}
+
+%card {
+  background-color: white;
+  border-radius: var.$border-radius;
+  box-shadow: var.$box-shadow;
+  padding: var.$spacing-md;
+  margin-bottom: var.$spacing-md;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  min-width: 80px;
+
+  &.pending {
+    background-color: var.$warning-color;
+  }
+
+  &.in_progress,
+  &.processing {
+    background-color: var.$info-color;
+  }
+
+  &.completed,
+  &.success {
+    background-color: var.$success-color;
+  }
+
+  &.failed {
+    background-color: var.$danger-color;
+  }
+
+  &.default {
+    background-color: var.$dark-gray;
+  }
+}

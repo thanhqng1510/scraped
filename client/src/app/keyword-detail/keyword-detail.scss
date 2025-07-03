@@ -1,8 +1,10 @@
-/* Basic styles for keyword detail page */
+@use '../../styles/variables' as var;
+@use '../../styles/base' as base;
+@use "sass:color";
 
 .container {
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  padding: var.$spacing-md;
+  font-family: var.$font-family-sans-serif;
   max-width: 960px;
   margin: 0 auto;
 }
@@ -10,75 +12,60 @@
 .page-header {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: var.$spacing-md;
 }
 
 .back-button {
   background: none;
   border: none;
-  color: #007bff;
+  color: var.$primary-color;
   font-size: 16px;
   cursor: pointer;
-  margin-right: 10px;
+  margin-right: var.$spacing-sm;
+
+  &:hover {
+    color: var.$primary-color-dark;
+  }
 }
 
 .page-title {
   font-size: 24px;
-  color: #333;
+  color: var.$dark-gray;
 }
 
 .error-message {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 10px;
-  border: 1px solid #f5c6cb;
+  background-color: color.adjust(var.$danger-color, $lightness: 30%);
+  color: color.adjust(var.$danger-color, $lightness: -20%);
+  border: 1px solid color.adjust(var.$danger-color, $lightness: 20%);
+  padding: var.$spacing-sm;
   border-radius: 5px;
-  margin-bottom: 20px;
+  margin-bottom: var.$spacing-md;
   text-align: center;
 }
 
 .keyword-details-section {
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+  @extend %card; // Use the global card style
 }
 
 .keyword-details-section h2 {
-  color: #333;
-  margin-bottom: 10px;
+  color: var.$dark-gray;
+  margin-bottom: var.$spacing-sm;
 }
 
 .keyword-details-section p {
   margin-bottom: 5px;
 }
 
-.status-badge {
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 0.9em;
-  color: white;
-  text-transform: capitalize;
-  display: inline-block;
-  margin-left: 10px;
-
-  &.completed, &.success { background-color: #28a745; }
-  &.pending { background-color: #ffc107; color: #333; }
-  &.failed { background-color: #dc3545; }
-  &.processing { background-color: #17a2b8; }
-}
-
 .attempts-list {
-  margin-top: 20px;
+  margin-top: var.$spacing-md;
 }
 
 .attempt-item {
   background-color: #fff;
-  border: 1px solid #eee;
+  border: 1px solid var.$border-color;
   border-radius: 5px;
   padding: 15px;
-  margin-bottom: 10px;
+  margin-bottom: var.$spacing-sm;
 }
 
 .attempt-item p {
@@ -86,19 +73,23 @@
 }
 
 .attempt-item button {
-  background-color: #007bff;
+  background-color: var.$primary-color;
   color: white;
   padding: 8px 12px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: var.$spacing-sm;
+
+  &:hover {
+    background-color: var.$primary-color-dark;
+  }
 }
 
 .html-viewer {
-  margin-top: 10px;
+  margin-top: var.$spacing-sm;
   background-color: #eee;
-  padding: 10px;
+  padding: var.$spacing-sm;
   border-radius: 4px;
   max-height: 300px;
   overflow-y: auto;
@@ -109,8 +100,8 @@
 .no-attempts {
   text-align: center;
   font-style: italic;
-  color: #777;
-  padding: 20px;
-  border: 1px dashed #ccc;
-  border-radius: 8px;
+  color: var.$text-color;
+  padding: var.$spacing-md;
+  border: 1px dashed var.$border-color;
+  border-radius: var.$border-radius;
 }

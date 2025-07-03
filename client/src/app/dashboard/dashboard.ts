@@ -6,8 +6,8 @@ import { LoadingComponent } from '../loading/loading';
 import { Keyword, KeywordService } from '../services/keyword.service';
 import { OnInit, OnDestroy, Component } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { trigger, style, animate, transition, query, stagger } from '@angular/animations';
 import { Router } from '@angular/router';
+import { listAnimation } from '../animations';  
 
 @Component({
   selector: 'app-dashboard',
@@ -15,18 +15,7 @@ import { Router } from '@angular/router';
   imports: [CommonModule, LoadingComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
-  animations: [
-    trigger('listAnimation', [
-      transition('* => *', [
-        query(':enter', [
-          style({ opacity: 0, transform: 'translateY(-20px)' }),
-          stagger('50ms', [
-            animate('300ms ease-out', style({ opacity: 1, transform: 'none' }))
-          ])
-        ], { optional: true })
-      ])
-    ])
-  ]
+  animations: [listAnimation]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
