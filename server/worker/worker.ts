@@ -88,24 +88,48 @@ const worker = createWorker(async (job) => {
   } catch (error: any) {
     console.error(`Job ${job.id} for keyword ${keywordId} failed:`, error);
 
-    // Update keyword status to Failed and save scrape attempt within a transaction
-    await prisma.$transaction(async (tx) => {
-      await tx.keyword.update({
-        where: { id: keywordId },
-        data: { status: 'FAILED' },
-      });
+    if (job.attemptsMade + 1 >= job.opts.attempts) { // Check if all retries are exhausted
+      console.log(`Job ${job?.id} for keyword ${job.data.keywordId} permanently failed after ${job.attemptsMade + 1} attempts.`);
 
-      await tx.scrapeAttempt.create({
-        data: {
-          keywordId: keywordId,
-          html: '',
-          adCount: 0,
-          linkCount: 0,
-          status: 'FAILED',
-          error: error.message,
-        },
+      await prisma.$transaction(async (tx) => {
+        await tx.keyword.update({
+          where: { id: keywordId },
+          data: { status: 'FAILED' },
+        });
+
+        await tx.scrapeAttempt.create({
+          data: {
+            keywordId: keywordId,
+            html: '',
+            adCount: 0,
+            linkCount: 0,
+            status: 'FAILED',
+            error: error.message,
+          },
+        });
       });
-    });
+    }
+    else {
+      console.log(`Job ${job.id} for keyword ${job.data.keywordId} failed. Retrying...`);
+
+      await prisma.$transaction(async (tx) => {
+        await tx.keyword.update({
+          where: { id: keywordId },
+          data: { status: 'PENDING' },
+        });
+
+        await tx.scrapeAttempt.create({
+          data: {
+            keywordId: keywordId,
+            html: '',
+            adCount: 0,
+            linkCount: 0,
+            status: 'FAILED',
+            error: error.message,
+          },
+        });
+      });
+    }
 
     throw error; // Re-throw to mark job as failed in BullMQ
   } finally {
@@ -113,12 +137,4 @@ const worker = createWorker(async (job) => {
       await browser.close();
     }
   }
-});
-
-worker.on('completed', (job) => {
-  console.log(`Job ${job.id} has completed.`);
-});
-
-worker.on('failed', (job, err) => {
-  console.log(`Job ${job?.id} has failed with ${err.message}`);
 });
