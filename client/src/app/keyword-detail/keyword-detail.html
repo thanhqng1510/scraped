@@ -20,10 +20,20 @@
         <p>Links: {{ attempt.linkCount }}</p>
         <p>Attempted At: {{ attempt.createdAt | date:'short' }}</p>
         <p *ngIf="attempt.error">Error: {{ attempt.error }}</p>
-        <button *ngIf="attempt.html" (click)="toggleHtml(attempt.id)">View HTML</button>
-        <div *ngIf="showHtml[attempt.id]" class="html-viewer">
+        <div class="attempt-actions" *ngIf="attempt.html">
+          <div class="segmented-control">
+            <button [class.active]="attempt.htmlDisplayMode === 'off'" (click)="setHtmlDisplayMode(attempt, 'off')">Hide</button>
+            <button [class.active]="attempt.htmlDisplayMode === 'raw'" (click)="setHtmlDisplayMode(attempt, 'raw')">Raw</button>
+            <button [class.active]="attempt.htmlDisplayMode === 'render'" (click)="setHtmlDisplayMode(attempt, 'render')">Render</button>
+          </div>
+        </div>
+        <div *ngIf="attempt.htmlDisplayMode === 'raw' && attempt.html && !attempt.isHtmlLoading" class="html-viewer">
           <pre>{{ attempt.html }}</pre>
         </div>
+        <div *ngIf="attempt.htmlDisplayMode === 'render' && attempt.html && !attempt.isHtmlLoading" class="html-viewer rendered-html">
+          <div [innerHTML]="getSanitizedHtml(attempt.html)"></div>
+        </div>
+        <app-loading *ngIf="attempt.isHtmlLoading"></app-loading>
       </div>
       <div *ngIf="keywordDetail.scrapeAttempts.length === 0" class="no-attempts">
         No scrape attempts yet.
