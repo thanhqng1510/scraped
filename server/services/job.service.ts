@@ -5,13 +5,26 @@ export interface EnqueueScrapeJobData {
 }
 
 const MAX_ENQUEUE_RETRIES = 5;
-const ENQUEUE_RETRY_DELAY_MS = 1000; // 1 second
+const ENQUEUE_RETRY_DELAY_MS = 1000;
 
 const enqueueJobWithRetry = async (keywordId: string): Promise<void> => {
   let attempts = 0;
   while (attempts < MAX_ENQUEUE_RETRIES) {
     try {
-      await scrapeQueue.add('scrape', { keywordId });
+      await scrapeQueue.add(
+        'scrape',
+        { keywordId },
+        {
+          jobId: `scrape-${keywordId}`,
+          removeOnComplete: {
+            age: 3600, // keep up to 1 hour
+            count: 1000, // keep up to 1000 jobs
+          },
+          removeOnFail: {
+            age: 24 * 3600, // keep up to 24 hours
+          },
+        },
+      );
       return; // Success, exit loop
     } catch (error) {
       attempts++;
