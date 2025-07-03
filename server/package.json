@@ -24,6 +24,7 @@
   "dependencies": {
     "@prisma/client": "^6.10.1",
     "bullmq": "^5.56.0",
+    "cheerio": "^1.1.0",
     "csv-parser": "^3.2.0",
     "dotenv": "^17.0.1",
     "ejs": "^3.1.10",
@@ -31,12 +32,19 @@
     "firebase-admin": "^13.4.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.1",
+    "puppeteer": "^24.11.2",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-adblocker": "^2.13.6",
+    "puppeteer-extra-plugin-proxy": "^1.0.2",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
+    "@types/cheerio": "^0.22.35",
     "@types/express": "^5.0.3",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.0.8",
+    "@types/puppeteer": "^5.4.7",
     "concurrently": "^9.2.0",
     "prisma": "^6.10.1",
     "ts-node-dev": "^2.0.0",

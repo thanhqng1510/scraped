@@ -8,6 +8,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string(),
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z.coerce.number().default(6379),
+  BING_SEARCH_URL: z.string().url().default('https://www.bing.com/search?q='),
 });
 
 export const env = envSchema.parse(process.env);

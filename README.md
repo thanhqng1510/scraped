@@ -44,7 +44,7 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
 3.  **Scraping Service:** For a given keyword, it will:
     *   Launch a headless browser instance (using Puppeteer).
     *   Configure the browser to use a proxy from a pool.
-    *   Use `puppeteer-extra` with a set of plugins (`puppeteer-extra-plugin-stealth`, `puppeteer-extra-plugin-recaptcha`, `puppeteer-extra-plugin-adblocker`, `puppeteer-extra-plugin-proxy`) to apply a suite of patches that make the headless browser significantly harder to detect.
+    *   Use `puppeteer-extra` with a set of plugins (`puppeteer-extra-plugin-stealth`, `puppeteer-extra-plugin-adblocker`, `puppeteer-extra-plugin-proxy`) to apply a suite of patches that make the headless browser significantly harder to detect.
     *   Open a new page and set a random user-agent.
     *   Navigate to the Bing search URL.
     *   Wait for the page and necessary content to fully render, executing JavaScript.
