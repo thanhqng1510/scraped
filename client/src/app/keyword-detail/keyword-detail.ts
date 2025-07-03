@@ -1,7 +1,7 @@
-import { trigger, style, animate, transition, query, stagger } from '@angular/animations';
 import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { listAnimation } from '../animations';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -31,18 +31,7 @@ interface KeywordDetail {
   imports: [CommonModule, LoadingComponent],
   templateUrl: './keyword-detail.html',
   styleUrl: './keyword-detail.scss',
-  animations: [
-    trigger('listAnimation', [
-      transition('* => *', [
-        query(':enter', [
-          style({ opacity: 0, transform: 'translateY(-20px)' }),
-          stagger('50ms', [
-            animate('300ms ease-out', style({ opacity: 1, transform: 'none' }))
-          ])
-        ], { optional: true })
-      ])
-    ])
-  ]
+  animations: [listAnimation]
 })
 export class KeywordDetailComponent implements OnInit {
   keywordId: string | null = null;
