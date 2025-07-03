@@ -1,0 +1,12 @@
+<header class="app-header">
+  <div routerLink="/dashboard" class="logo">Scraped</div>
+
+  <nav *ngIf="authService.isAuthenticated()">
+    <ul>
+      <li routerLinkActive="active"><a routerLink="/dashboard">Dashboard</a></li>
+      <li routerLinkActive="active"><a routerLink="/account">Account</a></li>
+      <li routerLinkActive="active"><a routerLink="/api-integration">API Integration</a></li>
+      <li><button (click)="logout()">Logout</button></li>
+    </ul>
+  </nav>
+</header>
