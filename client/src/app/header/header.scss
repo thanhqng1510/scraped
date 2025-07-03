@@ -1,0 +1,56 @@
+@use '../../styles/variables' as var;
+@use "sass:color";
+
+.app-header {
+  background-color: var.$dark-gray;
+  color: white;
+  padding: var.$spacing-md;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  .logo {
+    font-size: 1.8em;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center; /* Align items vertically in the middle */
+    gap: var.$spacing-md;
+
+    li a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.1em;
+      transition: color 0.2s ease;
+
+      &:hover,
+      &.active {
+        color: var.$primary-color;
+      }
+    }
+
+    button {
+      background-color: var.$danger-color;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: color.adjust(var.$danger-color, $lightness: -10%);
+      }
+    }
+  }
+}
