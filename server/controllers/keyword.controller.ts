@@ -108,3 +108,38 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
     res.status(500).send('Error fetching keywords.');
   }
 };
+
+export const getKeywordDetailsCtrl = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).send('Unauthorized: User not found.');
+      return;
+    }
+
+    const keywordId = req.params.id;
+    if (!keywordId) {
+      res.status(400).send('Invalid keyword ID.');
+      return;
+    }
+
+    const keyword = await prisma.keyword.findUnique({
+      where: { id: keywordId, userId: userId },
+      include: {
+        scrapeAttempts: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!keyword) {
+      res.status(404).send('Keyword not found or not authorized.');
+      return;
+    }
+
+    res.status(200).json(keyword);
+  } catch (error) {
+    console.error('Error fetching keyword details:', error);
+    res.status(500).send('Error fetching keyword details.');
+  }
+};

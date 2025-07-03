@@ -2,7 +2,7 @@ import { env } from './env';
 import express, { json } from 'express';
 import multer from 'multer';
 import { authMiddleware } from './middleware/auth';
-import { uploadKeywordsCtrl, getKeywordsCtrl } from './controllers/keyword.controller';
+import { uploadKeywordsCtrl, getKeywordsCtrl, getKeywordDetailsCtrl } from './controllers/keyword.controller';
 import { loginCtrl } from './controllers/auth.controller';
 
 const app = express();
@@ -16,6 +16,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.post('/api/v1/keywords/upload', authMiddleware, upload.single('keywords_file'), uploadKeywordsCtrl);
 
 app.get('/api/v1/keywords', authMiddleware, getKeywordsCtrl);
+
+app.get('/api/v1/keywords/:id', authMiddleware, getKeywordDetailsCtrl);
 
 // Default 404
 app.use((req, res) => {

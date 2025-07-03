@@ -20,6 +20,7 @@
           <th>Keyword</th>
           <th>Status</th>
           <th>Uploaded At</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody @listAnimation *ngIf="keywords.length > 0">
@@ -27,6 +28,7 @@
           <td>{{ keyword.text }}</td>
           <td><span class="status-badge {{ keyword.status | lowercase }}">{{ keyword.status }}</span></td>
           <td>{{ keyword.createdAt | date:'short' }}</td>
+          <td><button (click)="viewDetails(keyword.id)">View Details</button></td>
         </tr>
         <tr *ngIf="keywords.length === 0">
           <td colspan="3" class="no-keywords">No keywords uploaded yet.</td>
