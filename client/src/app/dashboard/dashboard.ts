@@ -7,6 +7,7 @@ import { Keyword, KeywordService } from '../services/keyword.service';
 import { OnInit, OnDestroy, Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { trigger, style, animate, transition, query, stagger } from '@angular/animations';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,9 +23,6 @@ import { trigger, style, animate, transition, query, stagger } from '@angular/an
           stagger('50ms', [
             animate('300ms ease-out', style({ opacity: 1, transform: 'none' }))
           ])
-        ], { optional: true }),
-        query(':leave', [
-          animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(20px)' }))
         ], { optional: true })
       ])
     ])
@@ -44,7 +42,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private keywordSubscription: Subscription | undefined;
 
-  constructor(private http: HttpClient, private authService: AuthService, private keywordService: KeywordService) { }
+  constructor(private http: HttpClient, private authService: AuthService, private keywordService: KeywordService, private router: Router) { }
 
   ngOnInit(): void {
     this.keywordSubscription = this.keywordService.keywords$.subscribe(response => {
@@ -117,5 +115,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
+  }
+
+  viewDetails(keywordId: number) {
+    this.router.navigate(['/keywords', keywordId]);
   }
 }

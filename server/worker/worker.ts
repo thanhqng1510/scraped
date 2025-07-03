@@ -1,19 +1,16 @@
 import { createWorker } from '../lib/queue';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
 import * as cheerio from 'cheerio';
 import prisma from '../lib/prisma';
 import { env } from '../env';
 import { loadProxies, getRandomProxy } from './services/proxy.service';
 import { getRandomUserAgent } from './services/user-agent.service';
 
-puppeteer.use(StealthPlugin());
-puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 // Load proxies when the worker starts
 loadProxies();
-
+puppeteer.use(StealthPlugin());
 console.log('Worker started');
 
 const worker = createWorker(async (job) => {

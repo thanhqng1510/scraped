@@ -44,7 +44,7 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
 3.  **Scraping Service:** For a given keyword, it will:
     *   Launch a headless browser instance (using Puppeteer).
     *   Configure the browser to use a proxy from a pool.
-    *   Use `puppeteer-extra` with a set of plugins (`puppeteer-extra-plugin-stealth`, `puppeteer-extra-plugin-adblocker`, `puppeteer-extra-plugin-proxy`) to apply a suite of patches that make the headless browser significantly harder to detect.
+    *   Use `puppeteer-extra` with a set of plugins (`puppeteer-extra-plugin-stealth`, `puppeteer-extra-plugin-proxy`) to apply a suite of patches that make the headless browser significantly harder to detect.
     *   Open a new page and set a random user-agent.
     *   Navigate to the Bing search URL.
     *   Wait for the page and necessary content to fully render, executing JavaScript.
@@ -59,22 +59,6 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
 6.  **Real-time Layer (WebSockets):** Using `Socket.IO`, the Express server maintains a persistent connection with the client's browser. When a background job completes, it will notify the web server, which will then push the updated data directly to the user's dashboard.
 
 7.  **Configuration Management:** All configuration (database URLs, API keys, etc.) is loaded from environment variables. The application uses `zod` to validate these variables on startup, ensuring that the application fails fast if any required configuration is missing or malformed.
-
-**Workflow:**
-
-```
-1. User uploads CSV -> [Express Web App]
-2. User's browser loads the current status of the running jobs.
-3. User's browser establishes a WebSocket connection for real-time updates.
-4. Express parses CSV & creates a Keyword record (status: 'pending') for each row.
-5. For each Keyword, enqueues a job -> [BullMQ Queue]
-6. [BullMQ Worker] picks up job from queue.
-7. Scraping Service (using Puppeteer) gets rendered HTML from [Bing.com] for a keyword.
-8. Scraping Service creates a new `ScrapeAttempt` record in [PostgreSQL DB] with the raw HTML, parsed results, and status ('success' or 'failed'). It then updates the parent `Keyword`'s overall status.
-9. The [BullMQ Worker] emits an event with the result.
-10. The [Express Web App]'s WebSocket server catches this event and pushes the new data to the specific user's browser in real-time.
-11. The user's dashboard UI updates instantly without a page refresh.
-```
 
 ## 4. Technical Stack
 
