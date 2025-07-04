@@ -14,16 +14,9 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
   const token = authHeader.split('Bearer ')[1];
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { uid: string; email: string };
-    const user = await prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
-
-    if (!user) {
-      res.status(404).send('User not found');
-      return;
-    }
-
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { uid: string; email: string, userid: string };
     req.firebaseId = decoded.uid;
-    req.user = user;
+    req.userid = decoded.userid;
     next();
   } catch (error) {
     console.error('Error verifying JWT:', error);

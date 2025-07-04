@@ -17,7 +17,7 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
 -   **Detailed Report View:** For each keyword, view the detailed scraped data:
     -   Total Ad count.
     -   Total link count.
-    -   **HTML Viewer:** View the scraped page's HTML, with options for a raw text view or a securely rendered preview in a sandboxed iframe.
+    -   **HTML Viewer:** View the scraped page's HTML, with options for raw text view or rendered view.
 -   **Search:** A global search bar to find specific keywords across all user reports.
 
 ### Backend & System
@@ -56,7 +56,7 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
 
 5.  **Proxy Service (External):** A third-party proxy rotation service is essential to avoid IP-based blocking.
 
-6.  **Real-time Layer (WebSockets):** Using `Socket.IO`, the Express server maintains a persistent connection with the client's browser. When a background job completes, it will notify the web server, which will then push the updated data directly to the user's dashboard.
+6.  **Real-time Layer (Server Sent Event):** Using `EventSource`, the Express server maintains a persistent connection with the client's browser. When a background job completes, it will notify the web server, which will then push the updated data directly to the user.
 
 7.  **Configuration Management:** All configuration (database URLs, API keys, etc.) is loaded from environment variables. The application uses `zod` to validate these variables on startup, ensuring that the application fails fast if any required configuration is missing or malformed.
 
@@ -71,7 +71,7 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
 | Async Jobs | BullMQ and Redis |
 | Authentication | Firebase Authentication |
 | Browser Automation | Puppeteer |
-| HTML Parsing | Cheerio (on rendered HTML) |
+| HTML Parsing | Cheerio |
 | Testing | Jest, supertest |
 
 ## 5. RESTful API

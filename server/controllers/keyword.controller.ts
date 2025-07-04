@@ -40,7 +40,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     }
 
     // Associate keywords with the authenticated user
-    const userId = req.user?.id; // Assuming req.user is populated by authMiddleware
+    const userId = req.userid;
     if (!userId) {
       res.status(401).send('Unauthorized: User not found.');
       return;
@@ -68,7 +68,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
 
 export const getKeywordsCtrl = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id; // Assuming req.user is populated by authMiddleware
+    const userId = req.userid;
     if (!userId) {
       res.status(401).send('Unauthorized: User not found.');
       return;
@@ -111,7 +111,7 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
 
 export const getKeywordDetailsCtrl = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.userid;
     if (!userId) {
       res.status(401).send('Unauthorized: User not found.');
       return;
