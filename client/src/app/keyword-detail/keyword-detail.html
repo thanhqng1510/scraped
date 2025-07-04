@@ -9,11 +9,16 @@
   <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
 
   <div *ngIf="keywordDetail" class="keyword-details-section">
-    <h2>Keyword: {{ keywordDetail.text }} <span class="status-badge {{ keywordDetail.status | lowercase }}">{{ keywordDetail.status }}</span></h2>
+    <h2>Keyword: {{ keywordDetail.text }} 
+      <span class="status-badge {{ keywordDetail.status | lowercase }}" [@flash]="keywordDetail.status">
+        {{ keywordDetail.status }}
+      </span>
+      <span class="live-indicator"></span>
+    </h2>
     <p>Uploaded At: {{ keywordDetail.createdAt | date:'short' }}</p>
 
-    <h3>Scrape Attempts ({{ keywordDetail.scrapeAttempts.length }})</h3>
-    <div class="attempts-list" @listAnimation>
+    <h3>Scrape Attempts ({{ keywordDetail.scrapeAttempts.length }}) <span class="live-indicator"></span></h3>
+    <div class="attempts-list" [@listAnimation]="keywordDetail.scrapeAttempts.length">
       <div *ngFor="let attempt of keywordDetail.scrapeAttempts" class="attempt-item">
         <p>Status: <span class="status-badge {{ attempt.status | lowercase }}">{{ attempt.status }}</span></p>
         <p>Ads: {{ attempt.adCount }}</p>

@@ -1,6 +1,6 @@
 import { Location, CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { listAnimation } from '../animations';
+import { listAnimation, flashAnimation } from '../animations';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -35,7 +35,8 @@ interface KeywordDetail {
   templateUrl: './keyword-detail.html',
   styleUrl: './keyword-detail.scss',
   animations: [
-    listAnimation
+    listAnimation,
+    flashAnimation
   ]
 })
 export class KeywordDetailComponent implements OnInit, OnDestroy {
@@ -44,7 +45,8 @@ export class KeywordDetailComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   errorMessage: string | null = null;
 
-  private realtimeSubscription: Subscription | undefined;
+  private scrapeAttemptSubscription: Subscription | undefined;
+  private keywordUpdateSubscription: Subscription | undefined;
 
   constructor(private route: ActivatedRoute, private http: HttpClient, private location: Location, private sanitizer: DomSanitizer, private realtimeService: RealtimeService) { }
 
@@ -54,7 +56,7 @@ export class KeywordDetailComponent implements OnInit, OnDestroy {
       this.fetchKeywordDetails(this.keywordId);
     }
 
-    this.realtimeSubscription = this.realtimeService.onScrapeAttemptCreate().subscribe(updatedAttempt => {
+    this.scrapeAttemptSubscription = this.realtimeService.onScrapeAttemptCreate().subscribe(updatedAttempt => {
       if (this.keywordDetail && updatedAttempt.keywordId === this.keywordDetail.id) {
         const index = this.keywordDetail.scrapeAttempts.findIndex(att => att.id === updatedAttempt.id);
         if (index !== -1) {
@@ -65,10 +67,17 @@ export class KeywordDetailComponent implements OnInit, OnDestroy {
         }
       }
     });
+
+    this.keywordUpdateSubscription = this.realtimeService.onKeywordUpdate().subscribe(updatedKeyword => {
+      if (this.keywordDetail && updatedKeyword.id === this.keywordDetail.id) {
+        this.keywordDetail.status = updatedKeyword.status;
+      }
+    });
   }
 
   ngOnDestroy(): void {
-    this.realtimeSubscription?.unsubscribe();
+    this.scrapeAttemptSubscription?.unsubscribe();
+    this.keywordUpdateSubscription?.unsubscribe();
   }
 
   goBack(): void {
@@ -112,3 +121,4 @@ export class KeywordDetailComponent implements OnInit, OnDestroy {
     return this.sanitizer.bypassSecurityTrustHtml(htmlContent);
   }
 }
+

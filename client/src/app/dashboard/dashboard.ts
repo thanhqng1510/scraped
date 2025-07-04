@@ -7,7 +7,7 @@ import { OnInit, OnDestroy, Component } from '@angular/core';
 import { RealtimeService } from '../services/realtime.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { listAnimation } from '../animations';  
+import { listAnimation, flashAnimation } from '../animations';  
 
 @Component({
   selector: 'app-dashboard',
@@ -15,7 +15,7 @@ import { listAnimation } from '../animations';
   imports: [CommonModule, LoadingComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
-  animations: [listAnimation]
+  animations: [listAnimation, flashAnimation]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
