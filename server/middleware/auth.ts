@@ -22,6 +22,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
+    req.firebaseId = decoded.uid;
     req.user = user;
     next();
   } catch (error) {

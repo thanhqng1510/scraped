@@ -1,12 +1,12 @@
-import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Location, CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { listAnimation } from '../animations';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingComponent } from '../loading/loading';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { RealtimeService } from '../services/realtime.service';
 
 interface ScrapeAttempt {
   id: number;
@@ -38,19 +38,37 @@ interface KeywordDetail {
     listAnimation
   ]
 })
-export class KeywordDetailComponent implements OnInit {
+export class KeywordDetailComponent implements OnInit, OnDestroy {
   keywordId: string | null = null;
   keywordDetail: KeywordDetail | null = null;
   isLoading: boolean = false;
   errorMessage: string | null = null;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private location: Location, private sanitizer: DomSanitizer) { }
+  private realtimeSubscription: Subscription | undefined;
+
+  constructor(private route: ActivatedRoute, private http: HttpClient, private location: Location, private sanitizer: DomSanitizer, private realtimeService: RealtimeService) { }
 
   ngOnInit(): void {
     this.keywordId = this.route.snapshot.paramMap.get('id');
     if (this.keywordId) {
       this.fetchKeywordDetails(this.keywordId);
     }
+
+    this.realtimeSubscription = this.realtimeService.scrapeAttemptCreate$.subscribe(updatedAttempt => {
+      if (this.keywordDetail && updatedAttempt.keywordId === this.keywordDetail.id) {
+        const index = this.keywordDetail.scrapeAttempts.findIndex(att => att.id === updatedAttempt.id);
+        if (index !== -1) {
+          this.keywordDetail.scrapeAttempts[index] = { ...this.keywordDetail.scrapeAttempts[index], ...updatedAttempt };
+        } else {
+          // If it's a new attempt for this keyword, add it
+          this.keywordDetail.scrapeAttempts.push(updatedAttempt);
+        }
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.realtimeSubscription?.unsubscribe();
   }
 
   goBack(): void {

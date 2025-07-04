@@ -1,19 +1,47 @@
-import { scrapeQueue } from '../lib/queue';
+import { Queue, Worker } from 'bullmq';
+import { env } from '../env';
+
+const MAX_JOB_RETRIES = 5;
+const JOB_BACKOFF_STRATEGY = 'exponential';
+const JOB_BACKOFF_DELAY_MS = 5000;
+
+const connection = {
+  host: env.REDIS_HOST,
+  port: env.REDIS_PORT,
+};
+
+export const scrapeQueue = new Queue('scrape', { 
+  connection,
+  defaultJobOptions: {
+    attempts: MAX_JOB_RETRIES,
+    backoff: {
+      type: JOB_BACKOFF_STRATEGY,
+      delay: JOB_BACKOFF_DELAY_MS,
+    },
+  },
+});
+
+export const createWorker = (processor: (job: any) => Promise<any>) => {
+  return new Worker('scrape', processor, { connection });
+};
+
+// --------------------------------------------------------------
 
 export interface EnqueueScrapeJobData {
   keywordId: string;
+  notiId: string;
 }
 
 const MAX_ENQUEUE_RETRIES = 5;
 const ENQUEUE_RETRY_DELAY_MS = 1000;
 
-const enqueueJobWithRetry = async (keywordId: string): Promise<void> => {
+const enqueueJobWithRetry = async (keywordId: string, notiId: string): Promise<void> => {
   let attempts = 0;
   while (attempts < MAX_ENQUEUE_RETRIES) {
     try {
       await scrapeQueue.add(
         'scrape',
-        { keywordId },
+        { keywordId, notiId },
         {
           jobId: `scrape-${keywordId}`,
           removeOnComplete: {
@@ -40,9 +68,9 @@ const enqueueJobWithRetry = async (keywordId: string): Promise<void> => {
   }
 };
 
-export const enqueueScrapingJobs = async (keywordIds: string[]) => {
+export const enqueueScrapingJobs = async (keywordIds: string[], notiId: string) => {
   const enqueuePromises = keywordIds.map((keywordId) =>
-    enqueueJobWithRetry(keywordId)
+    enqueueJobWithRetry(keywordId, notiId)
   );
 
   const results = await Promise.allSettled(enqueuePromises);

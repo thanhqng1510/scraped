@@ -1,4 +1,4 @@
-import { createWorker } from '../lib/queue';
+import { createWorker } from '../lib/scrape.queue';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import * as cheerio from 'cheerio';
@@ -6,15 +6,15 @@ import prisma from '../lib/prisma';
 import { env } from '../env';
 import { loadProxies, getRandomProxy } from './services/proxy.service';
 import { getRandomUserAgent } from './services/user-agent.service';
-
+import { notiQueue } from '../lib/noti.queue';
 
 // Load proxies when the worker starts
 loadProxies();
 puppeteer.use(StealthPlugin());
 console.log('Worker started');
 
-const worker = createWorker(async (job) => {
-  const { keywordId } = job.data;
+createWorker(async (job) => {
+  const { keywordId, notiId } = job.data;
   console.log(`Processing job ${job.id} for keyword ${keywordId}`);
 
   const keywordRecord = await prisma.keyword.findUnique({
@@ -30,6 +30,12 @@ const worker = createWorker(async (job) => {
   await prisma.keyword.update({
     where: { id: keywordId },
     data: { status: 'IN_PROGRESS' },
+  });
+
+  await notiQueue.add('noti', {
+    notiId,
+    eventType: 'keyword_update',
+    data: { id: keywordId, status: 'IN_PROGRESS' },
   });
 
   let browser;
@@ -64,13 +70,15 @@ const worker = createWorker(async (job) => {
     const totalLinks = $('a').length; // Count all <a> tags on the page
 
     // Update keyword status and save scrape attempt within a transaction
+    let scrapeAttempt: any;
+
     await prisma.$transaction(async (tx) => {
       await tx.keyword.update({
         where: { id: keywordId },
         data: { status: 'COMPLETED' },
       });
 
-      await tx.scrapeAttempt.create({
+      scrapeAttempt = await tx.scrapeAttempt.create({
         data: {
           keywordId: keywordId,
           html,
@@ -81,6 +89,18 @@ const worker = createWorker(async (job) => {
       });
     });
 
+    await notiQueue.add('noti', {
+      notiId,
+      eventType: 'keyword_update',
+      data: { id: keywordId, status: 'COMPLETED' },
+    });
+
+    await notiQueue.add('noti', {
+      notiId,
+      eventType: 'scrape_attempt_create',
+      data: { ...scrapeAttempt, keywordId: keywordId },
+    });
+
     console.log(`Finished job ${job.id} for keyword ${keywordId}. Ads: ${totalAds}, Links: ${totalLinks}`);
   } catch (error: any) {
     console.error(`Job ${job.id} for keyword ${keywordId} failed:`, error);
@@ -88,13 +108,15 @@ const worker = createWorker(async (job) => {
     if (job.attemptsMade + 1 >= job.opts.attempts) { // Check if all retries are exhausted
       console.log(`Job ${job?.id} for keyword ${job.data.keywordId} permanently failed after ${job.attemptsMade + 1} attempts.`);
 
+      let scrapeAttempt: any;
+
       await prisma.$transaction(async (tx) => {
         await tx.keyword.update({
           where: { id: keywordId },
           data: { status: 'FAILED' },
         });
 
-        await tx.scrapeAttempt.create({
+        scrapeAttempt = await tx.scrapeAttempt.create({
           data: {
             keywordId: keywordId,
             html: '',
@@ -105,9 +127,23 @@ const worker = createWorker(async (job) => {
           },
         });
       });
+
+      await notiQueue.add('noti', {
+        notiId,
+        eventType: 'keyword_update',
+        data: { id: keywordId, status: 'FAILED' },
+      });
+
+      await notiQueue.add('scrape_attempt_create', {
+        notiId,
+        eventType: 'scrape_attempt_create',
+        data: { ...scrapeAttempt, keywordId: keywordId },
+      });
     }
     else {
       console.log(`Job ${job.id} for keyword ${job.data.keywordId} failed. Retrying...`);
+
+      let scrapeAttempt: any;
 
       await prisma.$transaction(async (tx) => {
         await tx.keyword.update({
@@ -115,7 +151,7 @@ const worker = createWorker(async (job) => {
           data: { status: 'PENDING' },
         });
 
-        await tx.scrapeAttempt.create({
+        scrapeAttempt = await tx.scrapeAttempt.create({
           data: {
             keywordId: keywordId,
             html: '',
@@ -125,6 +161,18 @@ const worker = createWorker(async (job) => {
             error: error.message,
           },
         });
+      });
+
+      await notiQueue.add('noti', {
+        notiId,
+        eventType: 'keyword_update',
+        data: { id: keywordId, status: 'PENDING' },
+      });
+
+      await notiQueue.add('noti', {
+        notiId,
+        eventType: 'scrape_attempt_create',
+        data: { ...scrapeAttempt, keywordId: keywordId },
       });
     }
 

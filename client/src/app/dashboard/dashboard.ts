@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { LoadingComponent } from '../loading/loading';
 import { Keyword, KeywordService } from '../services/keyword.service';
 import { OnInit, OnDestroy, Component } from '@angular/core';
+import { RealtimeService } from '../services/realtime.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { listAnimation } from '../animations';  
@@ -30,8 +31,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   limit: number = 10;
 
   private keywordSubscription: Subscription | undefined;
+  private realtimeSubscription: Subscription | undefined;
 
-  constructor(private http: HttpClient, private authService: AuthService, private keywordService: KeywordService, private router: Router) { }
+  constructor(private http: HttpClient, private authService: AuthService, private keywordService: KeywordService, private router: Router, private realtimeService: RealtimeService) { }
 
   ngOnInit(): void {
     this.keywordSubscription = this.keywordService.keywords$.subscribe(response => {
@@ -47,10 +49,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
 
     this.keywordService.loadKeywords(this.currentPage, this.limit);
+
+    this.realtimeSubscription = this.realtimeService.keywordUpdates$.subscribe(updatedKeyword => {
+      const index = this.keywords.findIndex(k => k.id === updatedKeyword.id);
+      if (index !== -1) {
+        this.keywords[index] = { ...this.keywords[index], ...updatedKeyword };
+      } else {
+        // If the keyword is not in the current view, refresh the list
+        this.keywordService.loadKeywords(this.currentPage, this.limit);
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.keywordSubscription?.unsubscribe();
+    this.realtimeSubscription?.unsubscribe();
   }
 
   loadKeywords() {

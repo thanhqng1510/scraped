@@ -4,6 +4,8 @@ import multer from 'multer';
 import { authMiddleware } from './middleware/auth';
 import { uploadKeywordsCtrl, getKeywordsCtrl, getKeywordDetailsCtrl } from './controllers/keyword.controller';
 import { loginCtrl } from './controllers/auth.controller';
+import { authSSEMiddleware } from './middleware/authSSE';
+import { initNotiEventWorker, subscribeEventCtrl } from './controllers/event.controller';
 
 const app = express();
 const port = env.PORT;
@@ -18,6 +20,9 @@ app.post('/api/v1/keywords/upload', authMiddleware, upload.single('keywords_file
 app.get('/api/v1/keywords', authMiddleware, getKeywordsCtrl);
 
 app.get('/api/v1/keywords/:id', authMiddleware, getKeywordDetailsCtrl);
+
+app.get('/api/v1/events', authSSEMiddleware, subscribeEventCtrl);
+initNotiEventWorker()
 
 // Default 404
 app.use((req, res) => {

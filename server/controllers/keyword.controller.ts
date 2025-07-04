@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
 import prisma from '../lib/prisma';
-import { enqueueScrapingJobs } from '../services/job.service';
+import { enqueueScrapingJobs } from '../lib/scrape.queue';
 
 export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
   if (!req.file) {
@@ -59,7 +59,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     res.status(202).json({ message: 'Keywords accepted for processing', count: createdKeywords.length });
 
     // Enqueue jobs in the background without awaiting to prevent request timeouts
-    enqueueScrapingJobs(createdKeywords.map(k => k.id));
+    enqueueScrapingJobs(createdKeywords.map(k => k.id), req.firebaseId!);
   } catch (error) {
     console.error('Error processing CSV file.', error);
     res.status(500).send('Error processing CSV file.');
@@ -87,7 +87,7 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
       where: { userId },
       skip: skip,
       take: limit,
-      orderBy: { createdAt: 'desc' }, // Order by creation date, newest first
+      orderBy: { createdAt: 'desc' }
     });
 
     const totalKeywords = await prisma.keyword.count({
