@@ -12,8 +12,8 @@ export const authSSEMiddleware = (req: Request, res: Response, next: NextFunctio
   }
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { uid: string; email: string };
-    req.firebaseId = decoded.uid; // Attach userId to request for later use
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { email: string, userid: string };
+    req.userid = decoded.userid;
     next();
   } catch (error) {
     console.error('SSE authentication failed:', error);

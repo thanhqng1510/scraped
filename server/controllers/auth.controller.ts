@@ -26,7 +26,7 @@ export const loginCtrl = async (req: Request, res: Response) => {
       },
     });
 
-    const token = jwt.sign({ uid: user.firebaseUid, email: user.email, userid: user.id }, env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ email: user.email, userid: user.id }, env.JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: 'Authentication successful', token });
   } catch (error) {
     console.error('Error in POST /login:', error);
