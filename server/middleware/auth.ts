@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import prisma from '../lib/prisma';
 import { env } from '../env';
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -14,8 +13,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
   const token = authHeader.split('Bearer ')[1];
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { uid: string; email: string, userid: string };
-    req.firebaseId = decoded.uid;
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { email: string, userid: string };
     req.userid = decoded.userid;
     next();
   } catch (error) {
