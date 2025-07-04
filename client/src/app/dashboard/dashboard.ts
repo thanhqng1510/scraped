@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../auth/auth.service';
 import { firstValueFrom } from 'rxjs';
 import { LoadingComponent } from '../loading/loading';
 import { Keyword, KeywordService } from '../services/keyword.service';
@@ -33,7 +32,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private keywordSubscription: Subscription | undefined;
   private realtimeSubscription: Subscription | undefined;
 
-  constructor(private http: HttpClient, private authService: AuthService, private keywordService: KeywordService, private router: Router, private realtimeService: RealtimeService) { }
+  constructor(private http: HttpClient, private keywordService: KeywordService, private router: Router, private realtimeService: RealtimeService) { }
 
   ngOnInit(): void {
     this.keywordSubscription = this.keywordService.keywords$.subscribe(response => {
@@ -50,7 +49,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.keywordService.loadKeywords(this.currentPage, this.limit);
 
-    this.realtimeSubscription = this.realtimeService.keywordUpdates$.subscribe(updatedKeyword => {
+    this.realtimeSubscription = this.realtimeService.onKeywordUpdate().subscribe(updatedKeyword => {
       const index = this.keywords.findIndex(k => k.id === updatedKeyword.id);
       if (index !== -1) {
         this.keywords[index] = { ...this.keywords[index], ...updatedKeyword };
@@ -113,10 +112,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.selectedFile = event.target.files[0] || null;
     this.fileInput = event.target;
     this.uploadMessage = null;
-  }
-
-  logout() {
-    this.authService.logout();
   }
 
   viewDetails(keywordId: number) {

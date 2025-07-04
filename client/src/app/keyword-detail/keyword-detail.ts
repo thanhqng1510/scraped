@@ -54,7 +54,7 @@ export class KeywordDetailComponent implements OnInit, OnDestroy {
       this.fetchKeywordDetails(this.keywordId);
     }
 
-    this.realtimeSubscription = this.realtimeService.scrapeAttemptCreate$.subscribe(updatedAttempt => {
+    this.realtimeSubscription = this.realtimeService.onScrapeAttemptCreate().subscribe(updatedAttempt => {
       if (this.keywordDetail && updatedAttempt.keywordId === this.keywordDetail.id) {
         const index = this.keywordDetail.scrapeAttempts.findIndex(att => att.id === updatedAttempt.id);
         if (index !== -1) {
