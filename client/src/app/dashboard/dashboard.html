@@ -6,7 +6,6 @@
     <div class="upload-section">
       <input type="file" (change)="onFileSelected($event)" accept=".csv" #fileInputRef>
       <button (click)="uploadFile()" [disabled]="!selectedFile || isLoading">Upload CSV</button>
-      <button (click)="logout()">Logout</button>
     </div>
   </div>
 

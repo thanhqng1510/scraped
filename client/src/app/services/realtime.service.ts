@@ -9,15 +9,13 @@ export class RealtimeService {
   private eventSource: EventSource | undefined;
   private keywordUpdateSubject = new Subject<any>();
   private scrapeAttemptCreateSubject = new Subject<any>();
-
-  keywordUpdates$: Observable<any> = this.keywordUpdateSubject.asObservable();
-  scrapeAttemptCreate$: Observable<any> = this.scrapeAttemptCreateSubject.asObservable();
+  private refCount = 0; // Tracks active subscribers
 
   constructor(private authService: AuthService, private ngZone: NgZone) {}
 
-  connect(): void {
+  private _connect(): void {
     if (this.eventSource) {
-      this.disconnect();
+      return; // Already connected
     }
 
     const token = this.authService.getToken();
@@ -25,8 +23,14 @@ export class RealtimeService {
       console.warn('No authentication token found for SSE connection.');
       return;
     }
-    
+
     this.eventSource = new EventSource(`/api/v1/events?token=${token}`);
+
+    this.eventSource.onmessage = (event) => {
+      this.ngZone.run(() => {
+        console.log('SSE message:', event.data);
+      });
+    };
 
     this.eventSource.addEventListener('keyword_update', (event) => {
       this.ngZone.run(() => {
@@ -43,15 +47,52 @@ export class RealtimeService {
     this.eventSource.onerror = (error) => {
       this.ngZone.run(() => {
         console.error('SSE Error:', error);
+        // EventSource automatically tries to reconnect
       });
     };
+
+    console.log('SSE connection established.');
   }
 
-  disconnect(): void {
+  private _disconnect(): void {
     if (this.eventSource) {
       this.eventSource.close();
       this.eventSource = undefined;
       console.log('SSE connection closed.');
     }
+  }
+
+  onKeywordUpdate(): Observable<any> {
+    return new Observable(subscriber => {
+      this.refCount++;
+      if (this.refCount === 1) {
+        this._connect();
+      }
+      const subscription = this.keywordUpdateSubject.subscribe(subscriber);
+      return () => {
+        subscription.unsubscribe();
+        this.refCount--;
+        if (this.refCount === 0) {
+          this._disconnect();
+        }
+      };
+    });
+  }
+
+  onScrapeAttemptCreate(): Observable<any> {
+    return new Observable(subscriber => {
+      this.refCount++;
+      if (this.refCount === 1) {
+        this._connect();
+      }
+      const subscription = this.scrapeAttemptCreateSubject.subscribe(subscriber);
+      return () => {
+        subscription.unsubscribe();
+        this.refCount--;
+        if (this.refCount === 0) {
+          this._disconnect();
+        }
+      };
+    });
   }
 }
