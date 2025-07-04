@@ -17,7 +17,7 @@
       <thead>
         <tr>
           <th>Keyword</th>
-          <th>Status</th>
+          <th>Status <span class="live-indicator"></span></th>
           <th>Uploaded At</th>
           <th>Actions</th>
         </tr>
@@ -25,7 +25,7 @@
       <tbody @listAnimation *ngIf="keywords.length > 0">
         <tr *ngFor="let keyword of keywords">
           <td>{{ keyword.text }}</td>
-          <td><span class="status-badge {{ keyword.status | lowercase }}">{{ keyword.status }}</span></td>
+          <td><span class="status-badge {{ keyword.status | lowercase }}" [@flash]="keyword.status">{{ keyword.status }}</span></td>
           <td>{{ keyword.createdAt | date:'short' }}</td>
           <td><button (click)="viewDetails(keyword.id)">View Details</button></td>
         </tr>
