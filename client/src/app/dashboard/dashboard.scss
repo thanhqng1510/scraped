@@ -84,12 +84,14 @@
 .keyword-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   margin-bottom: var.$spacing-md;
 
   th,
   td {
     border: 1px solid var.$border-color;
     padding: 12px;
+    overflow-wrap: break-word;
     text-align: left;
   }
 

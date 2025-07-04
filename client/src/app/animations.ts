@@ -3,13 +3,13 @@ import { trigger, style, animate, transition, query, stagger, keyframes } from '
 export const listAnimation = trigger('listAnimation', [
   transition('* => *', [
     query(':enter', [
-      style({ opacity: 0, transform: 'translateY(-20px)' }),
+      style({ opacity: 0, transform: 'translateY(-30px)' }),
       stagger('50ms', [
-        animate('150ms ease-out', style({ opacity: 1, transform: 'none' }))
+        animate('350ms ease-in-out', style({ opacity: 1, transform: 'none' }))
       ])
     ], { optional: true }),
     query(':leave', [
-      animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(20px)' }))
+      animate('350ms ease-in-out', style({ opacity: 0, transform: 'translateY(30px)' }))
     ], { optional: true })
   ])
 ]);

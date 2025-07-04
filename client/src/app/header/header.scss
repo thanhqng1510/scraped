@@ -32,10 +32,13 @@
       font-size: 1.1em;
       transition: color 0.2s ease;
 
-      &:hover,
-      &.active {
+      &:hover {
         color: var.$primary-color;
       }
+    }
+    
+    li.active a {
+      color: var.$primary-color;
     }
 
     button {

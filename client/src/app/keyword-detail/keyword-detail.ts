@@ -1,5 +1,5 @@
 import { Location, CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, AfterViewInit } from '@angular/core';
 import { listAnimation, flashAnimation } from '../animations';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -39,7 +39,7 @@ interface KeywordDetail {
     flashAnimation
   ]
 })
-export class KeywordDetailComponent implements OnInit, OnDestroy {
+export class KeywordDetailComponent implements AfterViewInit, OnDestroy {
   keywordId: string | null = null;
   keywordDetail: KeywordDetail | null = null;
   isLoading: boolean = false;
@@ -50,7 +50,7 @@ export class KeywordDetailComponent implements OnInit, OnDestroy {
 
   constructor(private route: ActivatedRoute, private http: HttpClient, private location: Location, private sanitizer: DomSanitizer, private realtimeService: RealtimeService) { }
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
     this.keywordId = this.route.snapshot.paramMap.get('id');
     if (this.keywordId) {
       this.fetchKeywordDetails(this.keywordId);
@@ -62,8 +62,8 @@ export class KeywordDetailComponent implements OnInit, OnDestroy {
         if (index !== -1) {
           this.keywordDetail.scrapeAttempts[index] = { ...this.keywordDetail.scrapeAttempts[index], ...updatedAttempt };
         } else {
-          // If it's a new attempt for this keyword, add it
-          this.keywordDetail.scrapeAttempts.push(updatedAttempt);
+          // If it's a new attempt for this keyword, add it to the top of the list
+          this.keywordDetail.scrapeAttempts.unshift(updatedAttempt);
         }
       }
     });
@@ -93,9 +93,10 @@ export class KeywordDetailComponent implements OnInit, OnDestroy {
       // Initialize htmlDisplayMode for each attempt
       if (this.keywordDetail) {
         this.keywordDetail.scrapeAttempts.forEach(attempt => {
-        attempt.htmlDisplayMode = 'off';
-        attempt.isHtmlLoading = false;
-      });
+          // Default to 'raw' view if HTML is present, otherwise 'off'.
+          attempt.htmlDisplayMode = attempt.html ? 'raw' : 'off';
+          attempt.isHtmlLoading = false;
+        });
       }
     } catch (error: any) {
       this.errorMessage = `Failed to load keyword details: ${error.error.message || error.message}`;
@@ -105,20 +106,18 @@ export class KeywordDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  setHtmlDisplayMode(attempt: ScrapeAttempt, mode: 'off' | 'raw' | 'render') {
-    if (attempt.htmlDisplayMode === mode) {
-      return; // No change needed
-    }
-
+  setHtmlDisplayMode(attempt: ScrapeAttempt, mode: 'raw' | 'render') {
+    // If clicking the active button, toggle it off. Otherwise, switch to the new mode.
+    const newMode = attempt.htmlDisplayMode === mode ? 'off' : mode;
+    
     attempt.isHtmlLoading = true;
     setTimeout(() => {
-      attempt.htmlDisplayMode = mode;
+      attempt.htmlDisplayMode = newMode;
       attempt.isHtmlLoading = false;
-    }, 100);
+    }, 500);
   }
 
   getSanitizedHtml(htmlContent: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(htmlContent);
   }
 }
-

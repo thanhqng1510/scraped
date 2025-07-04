@@ -27,7 +27,6 @@
         <p *ngIf="attempt.error">Error: {{ attempt.error }}</p>
         <div class="attempt-actions" *ngIf="attempt.html">
           <div class="segmented-control">
-            <button [class.active]="attempt.htmlDisplayMode === 'off'" (click)="setHtmlDisplayMode(attempt, 'off')">Hide</button>
             <button [class.active]="attempt.htmlDisplayMode === 'raw'" (click)="setHtmlDisplayMode(attempt, 'raw')">Raw</button>
             <button [class.active]="attempt.htmlDisplayMode === 'render'" (click)="setHtmlDisplayMode(attempt, 'render')">Render</button>
           </div>
