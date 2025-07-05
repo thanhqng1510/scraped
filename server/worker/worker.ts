@@ -66,7 +66,7 @@ createWorker(async (job) => {
     const $ = cheerio.load(html);
 
     // Basic parsing
-    const totalAds = $('.sb_add, .ads').length; // Count elements with class 'sb_add' or 'ads'
+    const totalAds = $('.sb_add, .ads, .b_ad, [data-bm]').length; // Count elements with ad-related classes or attributes
     const totalLinks = $('a').length; // Count all <a> tags on the page
 
     // Update keyword status and save scrape attempt within a transaction
