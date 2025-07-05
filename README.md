@@ -18,7 +18,7 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
     -   Total Ad count.
     -   Total link count.
     -   **HTML Viewer:** View the scraped page's HTML, with options for raw text view or rendered view.
--   **Search:** A global search bar to find specific keywords across all user reports.
+-   **Search:** A global search bar to find specific keywords across all scraping attempts.
 
 ### Backend & System
 -   **Asynchronous Processing:** Keyword scraping is handled by background jobs to ensure the UI remains responsive.

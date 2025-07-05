@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"] 
 }
 
 datasource db {
@@ -66,5 +67,5 @@ model ScrapeAttempt {
   error     String?
   keywordId String
   keyword   Keyword             @relation(fields: [keywordId], references: [id], onDelete: Cascade)
-  createdAt DateTime            @default(now())
+  createdAt      DateTime        @default(now())
 }

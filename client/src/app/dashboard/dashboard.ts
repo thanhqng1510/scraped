@@ -7,12 +7,13 @@ import { OnInit, OnDestroy, Component } from '@angular/core';
 import { RealtimeService } from '../services/realtime.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { listAnimation, flashAnimation } from '../animations';  
+import { listAnimation, flashAnimation } from '../animations';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, LoadingComponent],
+  imports: [CommonModule, LoadingComponent, FormsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   animations: [listAnimation, flashAnimation]
@@ -28,6 +29,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   totalPages: number = 1;
   totalKeywords: number = 0;
   limit: number = 10;
+  searchTerm: string = '';
 
   private keywordSubscription: Subscription | undefined;
   private realtimeSubscription: Subscription | undefined;
@@ -38,7 +40,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.keywordSubscription = this.keywordService.keywords$.subscribe(response => {
       if (response) {
         this.keywords = [];
-        setTimeout(() => { this.keywords = response.data; }, 50);
+        setTimeout(() => { 
+          this.keywords = response.data;
+          this.isLoading = false;
+        }, 50);
 
         this.currentPage = response.pagination.page;
         this.totalPages = response.pagination.totalPages;
@@ -46,15 +51,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.keywordService.loadKeywords(this.currentPage, this.limit);
+    this.isLoading = true;
+    this.keywordService.loadKeywords(this.currentPage, this.limit, this.searchTerm);
 
     this.realtimeSubscription = this.realtimeService.onKeywordUpdate().subscribe(updatedKeyword => {
       const index = this.keywords.findIndex(k => k.id === updatedKeyword.id);
       if (index !== -1) {
         this.keywords[index] = { ...this.keywords[index], ...updatedKeyword };
-      } else {
-        // If the keyword is not in the current view, refresh the list
-        this.keywordService.loadKeywords(this.currentPage, this.limit);
       }
     });
   }
@@ -64,8 +67,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.realtimeSubscription?.unsubscribe();
   }
 
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
+  performSearch() {
+    this.isLoading = true;
+    this.keywordService.setSearchTerm(this.searchTerm);
+  }
+
+  goToPage(page: number | string) {
+    if (typeof page === 'number' && page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.keywordService.loadKeywords(this.currentPage, this.limit);
     }
@@ -73,6 +81,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get pages(): number[] {
     return Array(this.totalPages).fill(0).map((_, i) => i + 1);
+  }
+
+  get visiblePages(): (number | string)[] {
+    const pages: (number | string)[] = [];
+    const maxPagesToShow = 5; // Max number of page buttons to display
+    const half = Math.floor(maxPagesToShow / 2);
+
+    let startPage = Math.max(1, this.currentPage - half);
+    let endPage = Math.min(this.totalPages, this.currentPage + half);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      if (startPage === 1) {
+        endPage = Math.min(this.totalPages, maxPagesToShow);
+      } else if (endPage === this.totalPages) {
+        startPage = Math.max(1, this.totalPages - maxPagesToShow + 1);
+      }
+    }
+
+    if (startPage > 1) {
+      pages.push(1);
+      if (startPage > 2) {
+        pages.push('...');
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    if (endPage < this.totalPages) {
+      if (endPage < this.totalPages - 1) {
+        pages.push('...');
+      }
+      pages.push(this.totalPages);
+    }
+
+    return pages;
   }
 
   async uploadFile() {
@@ -94,7 +139,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.fileInput.value = ''; // Clear the file input
       }
       
-      this.keywordService.refreshKeywords(); // Refresh keyword list after upload
+      this.searchTerm = ''; // Reset search term after successful upload
+      this.keywordService.setSearchTerm(this.searchTerm); // Refresh keyword list after upload
     } catch (error: any) {
       this.uploadMessage = `Upload failed: ${error.error.message || error.message}`;
     } finally {
@@ -108,7 +154,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.uploadMessage = null;
   }
 
-  viewDetails(keywordId: number) {
+  viewDetails(keywordId: string) {
     this.router.navigate(['/keywords', keywordId]);
   }
 }
