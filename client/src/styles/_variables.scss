@@ -13,10 +13,16 @@ $dark-gray: #333;
 $text-color: #555;
 $border-color: #ddd;
 
+$background-color-light: #ffffff;
+$text-color-dark: #333333;
+$text-color-light: #666666;
+
 // Fonts
 $font-family-sans-serif: Arial, sans-serif;
+$font-family-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 
 // Spacing
+$spacing-xs: 5px;
 $spacing-sm: 10px;
 $spacing-md: 20px;
 $spacing-lg: 30px;

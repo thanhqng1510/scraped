@@ -1,27 +1,25 @@
 import { env } from './env';
-import express, { json } from 'express';
-import multer from 'multer';
+import express, { json, urlencoded } from 'express';
+import { initNotiEventWorker } from './controllers/events.controller';
+import authRoutes from './routes/auth.routes';
+import keywordsRoutes from './routes/keywords.routes';
+import eventsRoutes from './routes/events.routes';
+import apikeysRoutes from './routes/apikey.routes';
 import { authMiddleware } from './middleware/auth';
-import { uploadKeywordsCtrl, getKeywordsCtrl, getKeywordDetailsCtrl } from './controllers/keyword.controller';
-import { loginCtrl } from './controllers/auth.controller';
 import { authSSEMiddleware } from './middleware/authSSE';
-import { initNotiEventWorker, subscribeEventCtrl } from './controllers/event.controller';
 
 const app = express();
 const port = env.PORT;
 
+app.use(urlencoded({ extended: true }));
 app.use(json());
 
-app.post('/login', loginCtrl);
+// API Routes
+app.use('/login', authRoutes);
+app.use('/api/v1/keywords', authMiddleware, keywordsRoutes);
+app.use('/api/v1/events', authSSEMiddleware, eventsRoutes);
+app.use('/api/v1/apikeys', authMiddleware, apikeysRoutes);
 
-const upload = multer({ storage: multer.memoryStorage() });
-app.post('/api/v1/keywords/upload', authMiddleware, upload.single('keywords_file'), uploadKeywordsCtrl);
-
-app.get('/api/v1/keywords', authMiddleware, getKeywordsCtrl);
-
-app.get('/api/v1/keywords/:id', authMiddleware, getKeywordDetailsCtrl);
-
-app.get('/api/v1/events', authSSEMiddleware, subscribeEventCtrl);
 initNotiEventWorker()
 
 // Default 404

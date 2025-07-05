@@ -4,7 +4,7 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, Us
 import { environment } from './environment';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 const firebaseConfig = environment.firebaseConfig;
 
@@ -18,7 +18,7 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) {}
 
   private hasToken(): boolean {
     return !!localStorage.getItem('jwtToken');
@@ -44,8 +44,10 @@ export class AuthService {
 
   private async handleAuthSuccess(userCredential: UserCredential): Promise<void> {
     const idToken = await userCredential.user.getIdToken();
-    const response: any = await this.http.post('/login', { idToken }).toPromise();
+    const response: any = await firstValueFrom(this.http.post('/login', { idToken }));
+
     localStorage.setItem('jwtToken', response.token);
+
     this.isAuthenticatedSubject.next(true);
   }
 

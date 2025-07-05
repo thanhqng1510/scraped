@@ -33,7 +33,7 @@
           <td>{{ keyword.text }}</td>
           <td><span class="status-badge {{ keyword.status | lowercase }}" [@flash]="keyword.status">{{ keyword.status }}</span></td>
           <td>{{ keyword.createdAt | date:'short' }}</td>
-          <td><button (click)="viewDetails(keyword.id)">View Details</button></td>
+          <td><button class="details-btn" (click)="viewDetails(keyword.id)">View Details</button></td>
         </tr>
         <tr *ngIf="keywords.length === 0">
           <td colspan="4" class="no-keywords">No keywords uploaded yet.</td>

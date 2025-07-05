@@ -1,0 +1,63 @@
+<div class="container">
+  <h1>API Keys</h1>
+
+  <div class="card">
+    <h2>API Keys</h2>
+    <form [formGroup]="apiKeyForm" (ngSubmit)="generateApiKey()" class="api-key-form">
+      <h3>Create New API Key</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="keyName">Key Name</label>
+          <input id="keyName" type="text" formControlName="name" placeholder="e.g., My Test Script" />
+        </div>
+        <div class="form-group">
+          <label for="expiresInDays">Expires In (days, optional)</label>
+          <input id="expiresInDays" type="number" formControlName="expiresInDays" placeholder="e.g., 30" />
+        </div>
+        <button type="submit" [disabled]="apiKeyForm.invalid || isGenerating">
+          {{ isGenerating ? 'Generating...' : 'Create Key' }}
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf="newlyGeneratedKey" class="new-key-notification">
+      <p><strong>New API Key Generated!</strong></p>
+      <p>Please copy this key and store it securely. You will not be able to see it again.</p>
+      <div class="key-display">
+        <code>{{ newlyGeneratedKey }}</code>
+        <button (click)="copyToClipboard(newlyGeneratedKey)">Copy</button>
+      </div>
+    </div>
+
+    <h3>Your Keys</h3>
+    <app-loading *ngIf="isLoading"></app-loading>
+    
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+    <table *ngIf="!isLoading && apiKeys.length > 0" class="keyword-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Key</th>
+          <th>Created</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody @listAnimation>
+        <tr *ngFor="let key of apiKeys" [class.expired]="key.isExpired">
+          <td>{{ key.name }}</td>
+          <td><code>{{ key.key }}</code></td>
+          <td>{{ key.createdAt | date:'medium' }}</td>
+          <td>
+            <span *ngIf="!key.expiresAt" class="status-active">Active</span>
+            <span *ngIf="key.expiresAt && !key.isExpired" class="status-active">Expires {{ key.expiresAt | date:'mediumDate' }}</span>
+            <span *ngIf="key.isExpired" class="status-expired">Expired {{ key.expiresAt | date:'mediumDate' }}</span>
+          </td>
+          <td><button class="revoke-btn" (click)="revokeApiKey(key.id)" [disabled]="key.isExpired">Revoke</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!isLoading && apiKeys.length === 0" class="no-keys">You have not generated any API keys yet.</p>
+  </div>
+</div>

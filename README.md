@@ -52,9 +52,9 @@ The core challenge is to perform this scraping at scale while navigating Bing's 
     *   On failure (e.g., navigation timeout, CAPTCHA page), it will handle the error and schedule a retry with a backoff strategy.
 
 4.  **Database (PostgreSQL):** The single source of truth for all persistent data.
-    *   **Schema:** Includes tables for `User`, `Keyword`, and `ScrapeAttempt`. The `ScrapeAttempt` table is crucial as it stores the results of every individual scraping attempt (successful or failed), including the raw HTML, status, and any errors. This provides a detailed audit trail for each keyword.
+    *   **Schema:** Includes tables for `User`, `Keyword`, `ApiKey` and `ScrapeAttempt`. The `ScrapeAttempt` table is crucial as it stores the results of every individual scraping attempt (successful or failed), including the raw HTML, status, and any errors. This provides a detailed audit trail for each keyword.
 
-5.  **Proxy Service (External):** A third-party proxy rotation service is essential to avoid IP-based blocking.
+5.  **Proxy Service (External):** A third-party proxy rotation service to avoid IP-based blocking.
 
 6.  **Real-time Layer (Server Sent Event):** Using `EventSource`, the Express server maintains a persistent connection with the client's browser. When a background job completes, it will notify the web server, which will then push the updated data directly to the user.
 
@@ -130,6 +130,19 @@ The API supports two methods of authentication:
     *   Retrieves the detailed status and scrape results for a single keyword.
     *   **Response:** `200 OK` with a JSON object for the specified keyword, including an array of all its `scrapeAttempts`.
 
+*   **`POST /api/v1/apikeys`**
+    *   Create a new API key for the authenticated user.
+    *   **Body:** `application/json` with a `name` field and `expiredInDays` field.
+    *   **Response:** `201 Created` with a JSON object containing the newly created API key.
+
+*   **`GET /api/v1/apikeys`**
+    *   Retrieves a list of all API keys of the authenticated user.
+    *   **Response:** `200 OK` with a JSON array of API key objects.
+
+*   **`PATCH /api/v1/apikey/:id/revoke`**
+    *   Revokes an API key.
+    *   **Response:** `202 Accepted`.
+
 ## 6. Scraping Strategy
 
 1.  **Proxy Rotation:** Integrate with a proxy provider. For each request, a new IP address will be used.
@@ -139,7 +152,7 @@ The API supports two methods of authentication:
     *   If a request returns a non-200 status code or the HTML indicates a CAPTCHA, the job will fail.
     *   For every attempt (including retries), a `ScrapeAttempt` record is created. A failed attempt will have its error message and status stored in this record.
     *   A retry mechanism exponential backoff is used via BullMQ. The job will be re-enqueued for another attempt.
-    *   After 5 retries, if all attempts have failed, the parent `Keyword` status will be marked as `failed` in the database.
+    *   After 10 retries, if all attempts have failed, the parent `Keyword` status will be marked as `failed` in the database.
 
 ## 7. Testing
 
