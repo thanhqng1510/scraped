@@ -1,0 +1,103 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: scraped_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          cpus: "1"
+          memory: 1G
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      DATABASE_URL: postgresql://user:password@postgres:5432/scraped_db?schema=public
+      JWT_SECRET: brTUhmoKvgNROb6p7I3kXjPwNVnQb5vpVBY5a8f/j7Q=
+    volumes:
+      - ./server/firebase-service-account.json:/app/server/dist/firebase-service-account.json:ro
+    depends_on:
+      - postgres
+      - redis
+    command: node dist/index.js
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  worker:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      DATABASE_URL: postgresql://user:password@postgres:5432/scraped_db?schema=public
+      JWT_SECRET: brTUhmoKvgNROb6p7I3kXjPwNVnQb5vpVBY5a8f/j7Q=
+    depends_on:
+      - postgres
+      - redis
+    command: npm run worker:start
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 2G
+        reservations:
+          cpus: "1"
+          memory: 1G
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+volumes:
+  postgres_data:
+  redis_data:

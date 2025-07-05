@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface Keyword {
@@ -26,7 +26,7 @@ interface KeywordsResponse {
 })
 export class KeywordService {
   private apiUrl = '/api/v1/keywords';
-  
+
   private keywordsSubject = new BehaviorSubject<KeywordsResponse | null>(null);
   public keywords$ = this.keywordsSubject.asObservable();
 
@@ -43,11 +43,14 @@ export class KeywordService {
       this.currentSearchTerm = searchTerm;
     }
 
-    let url = `${this.apiUrl}?page=${this.currentPage}&limit=${this.currentLimit}`;
+    let params = new HttpParams()
+      .set('page', this.currentPage)
+      .set('limit', this.currentLimit);
     if (this.currentSearchTerm) {
-      url += `&search=${this.currentSearchTerm}`;
+      params = params.set('search', this.currentSearchTerm);
     }
-    this.http.get<KeywordsResponse>(url).pipe(
+
+    this.http.get<KeywordsResponse>(this.apiUrl, { params }).pipe(
       tap(response => this.keywordsSubject.next(response))
     ).subscribe();
   }

@@ -40,9 +40,6 @@
           <td>{{ keyword.createdAt | date:'short' }}</td>
           <td><button class="details-btn" (click)="viewDetails(keyword.id)">View Details</button></td>
         </tr>
-        <tr *ngIf="keywords.length === 0">
-          <td colspan="4" class="no-keywords">No keywords uploaded yet.</td>
-        </tr>
       </tbody>
     </table>
 

@@ -139,7 +139,7 @@ The API supports two methods of authentication:
     *   Retrieves a list of all API keys of the authenticated user.
     *   **Response:** `200 OK` with a JSON array of API key objects.
 
-*   **`PATCH /api/v1/apikey/:id/revoke`**
+*   **`PATCH /api/v1/apikeys/:id/revoke`**
     *   Revokes an API key.
     *   **Response:** `202 Accepted`.
 

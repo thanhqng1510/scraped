@@ -13,6 +13,8 @@ const connection = {
 export const notiQueue = new Queue('noti', { 
   connection,
   defaultJobOptions: {
+    removeOnComplete: true,
+    removeOnFail: true,
     attempts: MAX_JOB_RETRIES,
     backoff: {
       type: JOB_BACKOFF_STRATEGY,
