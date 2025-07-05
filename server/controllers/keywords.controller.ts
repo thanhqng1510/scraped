@@ -86,6 +86,8 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
     const whereClause: any = { userId: uid };
     const search = req.query.search as string;
     if (search) {
+      // Format for tsquery: treat spaces as OR operator for full-text search
+      const formattedSearch = search.trim().split(/\s+/).join(' | ');
       whereClause.OR = [
         {
           text: {
@@ -97,7 +99,7 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
           scrapeAttempts: {
             some: {
               html: {
-                search: search,
+                search: formattedSearch,
               },
             },
           },
@@ -105,16 +107,20 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
       ];
     }
 
-    const keywords = await prisma.keyword.findMany({
-      where: whereClause,
-      skip: skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-    });
-
-    const totalKeywords = await prisma.keyword.count({
-      where: whereClause,
-    });
+    const [totalKeywords, keywords] = await prisma.$transaction([
+      prisma.keyword.count({
+        where: whereClause,
+      }),
+      prisma.keyword.findMany({
+        where: whereClause,
+        skip: skip,
+        take: limit,
+        orderBy: [
+          { createdAt: 'desc' },
+          { text: 'asc' },
+        ],
+      }),
+    ]);
 
     res.status(200).json({
       data: keywords,

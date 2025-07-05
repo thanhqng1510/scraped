@@ -8,12 +8,11 @@ import { loadProxies, getRandomProxy } from './services/proxy.service';
 import { getRandomUserAgent } from './services/user-agent.service';
 import { notiQueue } from '../lib/noti.queue';
 
-// Load proxies when the worker starts
 loadProxies();
 puppeteer.use(StealthPlugin());
 console.log('Worker started');
 
-createWorker(async (job) => {
+const worker = createWorker(async (job) => {
   const { keywordId, notiId } = job.data;
   console.log(`Processing job ${job.id} for keyword ${keywordId}`);
 
@@ -38,16 +37,31 @@ createWorker(async (job) => {
     data: { id: keywordId, status: 'IN_PROGRESS' },
   });
 
-  let browser;
+  let browser, page;
   try {
+    const launchOptions: any = { 
+      args: [
+        '--no-sandbox', 
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+      ],
+      headless: 'new' 
+    };
+
     const proxy = getRandomProxy();
-    const launchOptions: any = { headless: 'new' };
     if (proxy) {
-      launchOptions.args = [`--proxy-server=${proxy.split('@')[1]}`]; // Extract host:port
+      launchOptions.args.push(`--proxy-server=${proxy.split('@')[1]}`); // Extract host:port
     }
 
     browser = await puppeteer.launch(launchOptions);
-    const page = await browser.newPage();
+    console.log('Browser launched')
+
+    page = await browser.newPage();
+    console.log('Page created')
+
+    page.setDefaultTimeout(30_000);
+    page.setDefaultNavigationTimeout(30_000);
 
     if (proxy && proxy.includes('@')) {
       const [username, password] = proxy.split('//')[1].split('@')[0].split(':');
@@ -60,6 +74,7 @@ createWorker(async (job) => {
     // Navigate to Bing search URL
     const searchUrl = `${env.BING_SEARCH_URL}${encodeURIComponent(keywordRecord.text)}`;
     await page.goto(searchUrl, { waitUntil: 'networkidle2' });
+    console.log('Navigated to Bing search URL')
 
     // Extract HTML
     const html = await page.content();
@@ -134,7 +149,7 @@ createWorker(async (job) => {
         data: { id: keywordId, status: 'FAILED' },
       });
 
-      await notiQueue.add('scrape_attempt_create', {
+      await notiQueue.add('noti', {
         notiId,
         eventType: 'scrape_attempt_create',
         data: { ...scrapeAttempt, keywordId: keywordId },
@@ -178,8 +193,60 @@ createWorker(async (job) => {
 
     throw error; // Re-throw to mark job as failed in BullMQ
   } finally {
-    if (browser) {
-      await browser.close();
-    }
+    await page?.close({ runBeforeUnload: false });
+    console.log('Page closed')
+
+    await browser?.close();
+    console.log('Browser closed')
   }
+
+  console.log('Job completed')
+});
+
+worker.on('active', (job) => {
+  console.log(`Job ${job.id} is active.`);
+});
+
+worker.on('closing', (msg) => {
+  console.log('Worker closing:', msg);
+});
+
+worker.on('closed', () => {
+  console.log('Worker closed.');
+});
+
+worker.on('completed', (job, res) => {
+  console.log(`Job ${job.id} completed with result:`, res);
+});
+
+worker.on('drained', () => {
+  console.log('Worker drained.');
+});
+
+worker.on('failed', (job, err) => {
+  console.error(`Job ${job?.id} failed:`, err);
+});
+
+worker.on('error', (err) => {
+  console.error('Worker error:', err);
+});
+
+worker.on('ioredis:close', () => {
+  console.log('IORedis connection closed.');
+});
+
+worker.on('paused', () => {
+  console.log('Worker paused.');
+});
+
+worker.on('ready', () => {
+  console.log('Worker is ready.');
+});
+
+worker.on('resumed', () => {
+  console.log('Worker resumed.');
+});
+
+worker.on('stalled', () => {
+  console.log('Worker stalled.');
 });
