@@ -22,12 +22,14 @@ model User {
 
 model ApiKey {
   id        String    @id @default(cuid())
-  key       String    @unique @default(cuid()) // Using cuid for simplicity, consider a more robust key generation
+  key       String    @unique
   name      String
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
-  revokedAt DateTime?
+  expiresAt DateTime?
+
+  @@index([userId])
 }
 
 enum KeywordStatus {
@@ -46,6 +48,8 @@ model Keyword {
   scrapeAttempts ScrapeAttempt[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  @@index([userId])
 }
 
 enum ScrapeAttemptStatus {

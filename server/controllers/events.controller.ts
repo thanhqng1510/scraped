@@ -4,7 +4,7 @@ import { createWorker } from '../lib/noti.queue';
 const clients = new Map<string, Response[]>();
 
 export const subscribeEventCtrl = async (req: Request, res: Response) => {
-  const notiId = req.userid!;
+  const notiId = req.uid!;
 
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',

@@ -40,8 +40,8 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     }
 
     // Associate keywords with the authenticated user
-    const userId = req.userid;
-    if (!userId) {
+    const uid = req.uid;
+    if (!uid) {
       res.status(401).send('Unauthorized: User not found.');
       return;
     }
@@ -49,7 +49,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     const createdKeywords = await prisma.keyword.createManyAndReturn({
       data: keywords.map((keyword) => ({
         text: keyword,
-        userId: userId,
+        userId: uid,
       })),
       select: {
         id: true,
@@ -59,7 +59,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     res.status(202).json({ message: 'Keywords accepted for processing', count: createdKeywords.length });
 
     // Enqueue jobs in the background without awaiting to prevent request timeouts
-    enqueueScrapingJobs(createdKeywords.map(k => k.id), req.userid!);
+    enqueueScrapingJobs(createdKeywords.map(k => k.id), req.uid!);
   } catch (error) {
     console.error('Error processing CSV file.', error);
     res.status(500).send('Error processing CSV file.');
@@ -68,8 +68,8 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
 
 export const getKeywordsCtrl = async (req: Request, res: Response) => {
   try {
-    const userId = req.userid;
-    if (!userId) {
+    const uid = req.uid;
+    if (!uid) {
       res.status(401).send('Unauthorized: User not found.');
       return;
     }
@@ -84,14 +84,14 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const keywords = await prisma.keyword.findMany({
-      where: { userId },
+      where: { userId: uid },
       skip: skip,
       take: limit,
       orderBy: { createdAt: 'desc' }
     });
 
     const totalKeywords = await prisma.keyword.count({
-      where: { userId },
+      where: { userId: uid },
     });
 
     res.status(200).json({
@@ -111,8 +111,8 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
 
 export const getKeywordDetailsCtrl = async (req: Request, res: Response) => {
   try {
-    const userId = req.userid;
-    if (!userId) {
+    const uid = req.uid;
+    if (!uid) {
       res.status(401).send('Unauthorized: User not found.');
       return;
     }
@@ -124,7 +124,7 @@ export const getKeywordDetailsCtrl = async (req: Request, res: Response) => {
     }
 
     const keyword = await prisma.keyword.findUnique({
-      where: { id: keywordId, userId: userId },
+      where: { id: keywordId, userId: uid },
       include: {
         scrapeAttempts: {
           orderBy: { createdAt: 'desc' },

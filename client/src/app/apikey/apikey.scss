@@ -1,0 +1,200 @@
+@use '../../styles/variables' as var;
+@use 'sass:color';
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var.$spacing-lg;
+}
+
+.card {
+  background-color: var.$background-color-light;
+  border: 1px solid var.$border-color;
+  border-radius: var.$border-radius;
+  padding: var.$spacing-lg;
+  margin-bottom: var.$spacing-lg;
+}
+
+h1,
+h2,
+h3 {
+  color: var.$text-color-dark;
+}
+
+h1 {
+  margin-bottom: var.$spacing-lg;
+}
+
+h2,
+h3 {
+  margin-top: 0;
+  border-bottom: 1px solid var.$border-color;
+  padding-bottom: var.$spacing-sm;
+  margin-bottom: var.$spacing-md;
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
+.description,
+.no-keys {
+  color: var.$text-color-light;
+  margin-bottom: var.$spacing-md;
+}
+
+.api-key-form {
+  margin-bottom: var.$spacing-lg;
+
+  .form-row {
+    display: flex;
+    align-items: flex-end;
+    gap: var.$spacing-md;
+    flex-wrap: wrap;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    label {
+      font-size: 0.9rem;
+      color: var.$text-color-light;
+      margin-bottom: var.$spacing-xs;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      border: 1px solid var.$border-color;
+      padding: 8px;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+  }
+
+  button[type="submit"] {
+    background-color: var.$primary-color;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+
+    &:hover:not([disabled]) {
+      background-color: var.$primary-color-dark;
+    }
+
+    &[disabled] {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.new-key-notification {
+  background-color: #e8f5e9; // A light green
+  border: 1px solid #a5d6a7;
+  border-radius: var.$border-radius;
+  padding: var.$spacing-md;
+  margin: var.$spacing-lg 0;
+
+  p {
+    margin: 0 0 var.$spacing-sm 0;
+  }
+
+  .key-display {
+    display: flex;
+    align-items: center;
+    gap: var.$spacing-md;
+    background-color: #fff;
+    padding: var.$spacing-sm var.$spacing-md;
+    border-radius: var.$border-radius;
+
+    code {
+      font-family: var.$font-family-mono;
+      flex-grow: 1;
+      word-break: break-all;
+    }
+
+    button {
+      background-color: var.$primary-color;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: var.$primary-color-dark;
+      }
+    }
+  }
+}
+
+.keyword-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-bottom: var.$spacing-md;
+
+  th,
+  td {
+    border: 1px solid var.$border-color;
+    padding: 12px;
+    overflow-wrap: break-word;
+    text-align: left;
+  }
+
+  th {
+    background-color: var.$medium-gray;
+    color: var.$text-color;
+    font-weight: bold;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: var.$light-gray;
+  }
+
+  tbody tr:hover {
+    background-color: color.adjust(var.$border-color, $lightness: 5%);
+  }
+
+  tr.expired {
+    td,
+    code {
+      color: var.$text-color-light;
+    }
+  }
+
+  .status-active {
+    color: var.$success-color;
+  }
+
+  .status-expired {
+    color: var.$danger-color;
+  }
+}
+
+.revoke-btn {
+  background-color: var.$danger-color;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: color.adjust(var.$danger-color, $lightness: -10%);
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}

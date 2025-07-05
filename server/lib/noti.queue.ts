@@ -1,7 +1,7 @@
 import { Queue, Worker } from 'bullmq';
 import { env } from '../env';
 
-const MAX_JOB_RETRIES = 5;
+const MAX_JOB_RETRIES = 10;
 const JOB_BACKOFF_STRATEGY = 'exponential';
 const JOB_BACKOFF_DELAY_MS = 1000;
 

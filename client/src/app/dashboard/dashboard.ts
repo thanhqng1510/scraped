@@ -43,7 +43,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.currentPage = response.pagination.page;
         this.totalPages = response.pagination.totalPages;
         this.totalKeywords = response.pagination.total;
-        this.isLoading = false;
       }
     });
 
@@ -63,11 +62,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.keywordSubscription?.unsubscribe();
     this.realtimeSubscription?.unsubscribe();
-  }
-
-  loadKeywords() {
-    this.isLoading = true;
-    this.keywordService.loadKeywords(this.currentPage, this.limit);
   }
 
   goToPage(page: number) {

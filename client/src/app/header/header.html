@@ -4,8 +4,7 @@
   <nav *ngIf="authService.isAuthenticated()">
     <ul>
       <li routerLinkActive="active"><a routerLink="/dashboard">Dashboard</a></li>
-      <li routerLinkActive="active"><a routerLink="/account">Account</a></li>
-      <li routerLinkActive="active"><a routerLink="/api-integration">API Integration</a></li>
+      <li routerLinkActive="active"><a routerLink="/apikey">API Key</a></li>
       <li><button (click)="logout()">Logout</button></li>
     </ul>
   </nav>
