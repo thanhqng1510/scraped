@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface Keyword {
-  id: number;
+  id: string;
   text: string;
   status: string;
   createdAt: string;
@@ -32,18 +32,32 @@ export class KeywordService {
 
   private currentPage = 1;
   private currentLimit = 10;
+  private currentSearchTerm: string = '';
 
   constructor(private http: HttpClient) { }
 
-  loadKeywords(page: number = this.currentPage, limit: number = this.currentLimit): void {
+  loadKeywords(page: number = this.currentPage, limit: number = this.currentLimit, searchTerm?: string): void {
     this.currentPage = page;
     this.currentLimit = limit;
-    this.http.get<KeywordsResponse>(`${this.apiUrl}?page=${page}&limit=${limit}`).pipe(
+    if (searchTerm !== undefined) {
+      this.currentSearchTerm = searchTerm;
+    }
+
+    let url = `${this.apiUrl}?page=${this.currentPage}&limit=${this.currentLimit}`;
+    if (this.currentSearchTerm) {
+      url += `&search=${this.currentSearchTerm}`;
+    }
+    this.http.get<KeywordsResponse>(url).pipe(
       tap(response => this.keywordsSubject.next(response))
     ).subscribe();
   }
 
   refreshKeywords(): void {
     this.loadKeywords(this.currentPage, this.currentLimit);
+  }
+
+  setSearchTerm(term: string): void {
+    this.currentSearchTerm = term;
+    this.loadKeywords(1, this.currentLimit); // Reset to page 1 on new search
   }
 }

@@ -83,15 +83,37 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
 
     const skip = (page - 1) * limit;
 
+    const whereClause: any = { userId: uid };
+    const search = req.query.search as string;
+    if (search) {
+      whereClause.OR = [
+        {
+          text: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          scrapeAttempts: {
+            some: {
+              html: {
+                search: search,
+              },
+            },
+          },
+        },
+      ];
+    }
+
     const keywords = await prisma.keyword.findMany({
-      where: { userId: uid },
+      where: whereClause,
       skip: skip,
       take: limit,
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     const totalKeywords = await prisma.keyword.count({
-      where: { userId: uid },
+      where: whereClause,
     });
 
     res.status(200).json({
