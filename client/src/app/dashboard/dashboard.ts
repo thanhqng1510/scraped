@@ -28,7 +28,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   currentPage: number = 1;
   totalPages: number = 1;
   totalKeywords: number = 0;
-  limit: number = 10;
+  limit: number = 20;
   searchTerm: string = '';
 
   private keywordSubscription: Subscription | undefined;
