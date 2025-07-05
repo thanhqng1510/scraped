@@ -1,0 +1,55 @@
+@baseUrl = http://localhost:3000
+@apiKey = sk_180c39a66b056cb595117fb4979a4b0dfde833537d06e6b0
+
+### Create a new API Key
+POST {{baseUrl}}/api/v1/apikeys
+Content-Type: application/json
+Authorization: Api-Key {{apiKey}}
+
+{
+  "name": "My Test Script",
+  "expiresInDays": 30
+}
+
+###
+
+### List all API Keys
+GET {{baseUrl}}/api/v1/apikeys
+Authorization: Api-Key {{apiKey}}
+
+###
+
+### Revoke the API Key
+@apiKeyId = Enter-Here
+
+PATCH {{baseUrl}}/api/v1/apikeys/{{apiKeyId}}/revoke
+Authorization: Api-Key {{apiKey}}
+
+###
+
+### Get keyword list
+GET {{baseUrl}}/api/v1/keywords
+Authorization: Api-Key {{apiKey}}
+
+###
+
+### Get keyword details
+@keywordId = Enter-Here
+
+GET {{baseUrl}}/api/v1/keywords/{{keywordId}}
+Authorization: Api-Key {{apiKey}}
+
+###
+
+### Upload keyword CSV
+POST {{baseUrl}}/api/v1/keywords/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Api-Key {{apiKey}}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="keywords_file"; filename="sample.csv"
+
+< ./keywords.csv
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
