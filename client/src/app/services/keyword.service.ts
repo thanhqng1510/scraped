@@ -16,7 +16,7 @@ interface Pagination {
   totalPages: number;
 }
 
-interface KeywordsResponse {
+export interface KeywordsResponse {
   data: Keyword[];
   pagination: Pagination;
 }
