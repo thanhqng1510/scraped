@@ -40,11 +40,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     }
 
     // Associate keywords with the authenticated user
-    const uid = req.uid;
-    if (!uid) {
-      res.status(401).send('Unauthorized: User not found.');
-      return;
-    }
+    const uid = req.uid!;
 
     const createdKeywords = await prisma.keyword.createManyAndReturn({
       data: keywords.map((keyword) => ({
@@ -68,11 +64,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
 
 export const getKeywordsCtrl = async (req: Request, res: Response) => {
   try {
-    const uid = req.uid;
-    if (!uid) {
-      res.status(401).send('Unauthorized: User not found.');
-      return;
-    }
+    const uid = req.uid!;
 
     let page = parseInt(req.query.page as string) || 1;
     page = Math.max(page, 1);
@@ -139,11 +131,7 @@ export const getKeywordsCtrl = async (req: Request, res: Response) => {
 
 export const getKeywordDetailsCtrl = async (req: Request, res: Response) => {
   try {
-    const uid = req.uid;
-    if (!uid) {
-      res.status(401).send('Unauthorized: User not found.');
-      return;
-    }
+    const uid = req.uid!;
 
     const keywordId = req.params.id;
     if (!keywordId) {
