@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { LoadingComponent } from '../loading/loading';
+import { LoadingComponent } from '../loading/loading.component';
 import { Keyword, KeywordService } from '../services/keyword.service';
 import { OnInit, OnDestroy, Component } from '@angular/core';
 import { RealtimeService } from '../services/realtime.service';
@@ -14,8 +14,8 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, LoadingComponent, FormsModule],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss',
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss',
   animations: [listAnimation, flashAnimation]
 })
 export class DashboardComponent implements OnInit, OnDestroy {

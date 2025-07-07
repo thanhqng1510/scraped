@@ -2,15 +2,15 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LoadingComponent } from '../loading/loading';
-import { AuthService } from './auth.service';
+import { LoadingComponent } from '../loading/loading.component';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-auth',
   standalone: true,
   imports: [FormsModule, CommonModule, LoadingComponent],
-  templateUrl: './auth.html',
-  styleUrl: './auth.scss'
+  templateUrl: './auth.component.html',
+  styleUrl: './auth.component.scss'
 })
 export class AuthComponent {
   email!: string;

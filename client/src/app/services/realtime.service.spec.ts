@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { NgZone } from '@angular/core';
 import { RealtimeService } from './realtime.service';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from './auth.service';
 import { Subscription } from 'rxjs';
 
 // A mock EventSource to simulate SSE behavior in tests

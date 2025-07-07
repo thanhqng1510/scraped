@@ -4,7 +4,7 @@ import { listAnimation, flashAnimation } from '../animations';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { LoadingComponent } from '../loading/loading';
+import { LoadingComponent } from '../loading/loading.component';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { RealtimeService } from '../services/realtime.service';
 
@@ -32,8 +32,8 @@ interface KeywordDetail {
   selector: 'app-keyword-detail',
   standalone: true,
   imports: [CommonModule, LoadingComponent],
-  templateUrl: './keyword-detail.html',
-  styleUrl: './keyword-detail.scss',
+  templateUrl: './keyword-detail.component.html',
+  styleUrl: './keyword-detail.component.scss',
   animations: [
     listAnimation,
     flashAnimation

@@ -3,8 +3,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
-import { HeaderComponent } from './header';
-import { AuthService } from '../auth/auth.service';
+import { HeaderComponent } from './header.component';
+import { AuthService } from '../services/auth.service';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
