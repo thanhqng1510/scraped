@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../auth/auth.service';
-import { LoadingComponent } from '../loading/loading';
+import { AuthService } from '../services/auth.service';
+import { LoadingComponent } from '../loading/loading.component';
 import { listAnimation } from '../animations';
 
 interface ApiKey {
@@ -20,8 +20,8 @@ interface ApiKey {
   selector: 'app-apikey',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, LoadingComponent],
-  templateUrl: './apikey.html',
-  styleUrls: ['./apikey.scss'],
+  templateUrl: './apikey.component.html',
+  styleUrls: ['./apikey.component.scss'],
   animations: [listAnimation]
 })
 export class ApiKeyComponent implements AfterViewInit {

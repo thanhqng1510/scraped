@@ -5,8 +5,8 @@ import authRoutes from './routes/auth.routes';
 import keywordsRoutes from './routes/keywords.routes';
 import eventsRoutes from './routes/events.routes';
 import apikeysRoutes from './routes/apikey.routes';
-import { authMiddleware } from './middleware/auth';
-import { authSSEMiddleware } from './middleware/authSSE';
+import { authMiddleware } from './middleware/auth.middleware';
+import { authSSEMiddleware } from './middleware/authSSE.middleware';
 
 const app = express();
 const port = env.PORT;

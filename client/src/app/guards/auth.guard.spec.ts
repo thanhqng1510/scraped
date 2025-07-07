@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { authGuard } from './auth.guard';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../services/auth.service';
 
 describe('authGuard', () => {
   // Helper function to execute the guard within an injection context

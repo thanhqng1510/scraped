@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { authSSEMiddleware } from '../../middleware/authSSE';
+import { authSSEMiddleware } from '../../middleware/authSSE.middleware';
 import jwt from 'jsonwebtoken';
 import { env } from '../../env';
 

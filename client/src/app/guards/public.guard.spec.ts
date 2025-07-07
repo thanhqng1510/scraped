@@ -3,7 +3,7 @@ import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } fr
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { publicGuard } from './public.guard';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../services/auth.service';
 
 describe('publicGuard', () => {
   // Helper function to execute the guard within an injection context
