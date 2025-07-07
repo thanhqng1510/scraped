@@ -3,6 +3,35 @@ import jwt from 'jsonwebtoken';
 import { env } from '../env';
 import prisma from '../lib/prisma';
 
+// Helper function to handle Bearer token authentication
+function handleBearerAuth(token: string): string | undefined {
+  try {
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { uid: string };
+    return decoded.uid;
+  }
+  catch(err) {
+    console.error('Bearer authentication failed:', err)
+  }
+}
+
+// Helper function to handle API Key authentication
+async function handleApiKeyAuth(token: string): Promise<string | undefined> {
+  const apiKey = await prisma.apiKey.findUnique({
+    where: {
+      key: token
+    },
+    select: { userId: true, expiresAt: true },
+  });
+
+  const isKeyValid = apiKey && (!apiKey.expiresAt || new Date(apiKey.expiresAt) > new Date());
+  if (isKeyValid) {
+    return apiKey.userId;
+  }
+
+  console.error('API Key authentication failed:', token);
+  return undefined;
+}
+
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
@@ -17,22 +46,9 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     let uid: string | undefined;
 
     if (scheme === 'Bearer' && token) {
-      // Handle custom JWT for user sessions (no DB query)
-      const decoded = jwt.verify(token, env.JWT_SECRET) as { uid: string };
-      uid = decoded.uid;
+      uid = handleBearerAuth(token);
     } else if (scheme === 'Api-Key' && token) {
-      // Handle API Key (requires a DB query)
-      const apiKey = await prisma.apiKey.findUnique({
-        where: { 
-          key: token 
-        },
-        select: { userId: true, expiresAt: true },
-      });
-
-      const isKeyValid = apiKey && (!apiKey.expiresAt || new Date(apiKey.expiresAt) > new Date());
-      if (isKeyValid) {
-        uid = apiKey.userId;
-      }
+      uid = await handleApiKeyAuth(token);
     } else {
       res.status(401).json({ message: 'Unsupported or malformed authorization scheme.' });
       return
