@@ -7,10 +7,119 @@ import { env } from '../env';
 import { loadProxies, getRandomProxy } from './services/proxy.service';
 import { getRandomUserAgent } from './services/user-agent.service';
 import { notiQueue } from '../lib/noti.queue';
+import { Browser, Page } from 'puppeteer';
 
 loadProxies();
 puppeteer.use(StealthPlugin());
 console.log('Worker started');
+
+// Helper function to initialize browser and page
+async function initializeBrowserAndPage() {
+  const launchOptions: any = {
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+    ],
+    headless: 'new'
+  };
+
+  const proxy = getRandomProxy();
+  if (proxy) {
+    launchOptions.args.push(`--proxy-server=${proxy.split('@')[1]}`);
+  }
+
+  const browser = await puppeteer.launch(launchOptions);
+  const page = await browser.newPage();
+
+  page.setDefaultTimeout(30_000);
+  page.setDefaultNavigationTimeout(30_000);
+
+  if (proxy && proxy.includes('@')) {
+    const [username, password] = proxy.split('//')[1].split('@')[0].split(':');
+    await page.authenticate({ username, password });
+  }
+
+  await page.setUserAgent(getRandomUserAgent());
+
+  return { browser, page };
+}
+
+// Helper function to perform Bing search and get HTML
+async function performBingSearch(page: Page, keywordText: string) {
+  const searchUrl = `${env.BING_SEARCH_URL}${encodeURIComponent(keywordText)}`;
+  await page.goto(searchUrl, { waitUntil: 'networkidle2' });
+  return await page.content();
+}
+
+// Helper function to parse HTML and extract data
+function parseBingResults(html: string) {
+  const $ = cheerio.load(html);
+  const totalAds = $('.sb_add, .ads, .b_ad, [data-bm]').length;
+  const totalLinks = $('a').length;
+  return { totalAds, totalLinks };
+}
+
+// Helper function to update keyword status and save scrape attempt
+async function updateKeywordAndSaveScrapeAttempt(
+  keywordData: { id: string, status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' },
+  scrapeAttemptData: { html: string | null, adCount: number, linkCount: number, status: 'SUCCESS' | 'FAILED' } | null
+) {
+  let scrapeAttempt: any;
+  await prisma.$transaction(async (tx) => {
+    await tx.keyword.update({
+      where: { id: keywordData.id },
+      data: { status: keywordData.status },
+    });
+
+    if (scrapeAttemptData) {
+      scrapeAttempt = await tx.scrapeAttempt.create({
+        data: {
+          keywordId: keywordData.id,
+          html: scrapeAttemptData.html,
+          adCount: scrapeAttemptData.adCount,
+          linkCount: scrapeAttemptData.linkCount,
+          status: scrapeAttemptData.status
+        },
+      });
+    }
+  });
+  return scrapeAttempt;
+}
+
+// Helper function to handle scrape failures
+async function handleScrapeFailure(job: any, keywordId: string, error: any, notiId: string) {
+  console.error(`Job ${job.id} for keyword ${keywordId} failed:`, error);
+
+  let status: 'PENDING' | 'FAILED';
+  if (job.attemptsMade + 1 >= job.opts.attempts) {
+    console.log(`Job ${job?.id} for keyword ${job.data.keywordId} permanently failed after ${job.attemptsMade + 1} attempts.`);
+    status = 'FAILED';
+  } else {
+    console.log(`Job ${job.id} for keyword ${job.data.keywordId} failed. Retrying...`);
+    status = 'PENDING';
+  }
+
+  const scrapeAttempt = await updateKeywordAndSaveScrapeAttempt(
+    { id: keywordId, status },
+    { html: null, adCount: 0, linkCount: 0, status: 'FAILED'}
+  );
+
+  await notiQueue.add('noti', {
+    notiId,
+    eventType: 'keyword_update',
+    data: { id: keywordId, status },
+  });
+
+  await notiQueue.add('noti', {
+    notiId,
+    eventType: 'scrape_attempt_create',
+    data: { ...scrapeAttempt, keywordId },
+  });
+
+  throw error; // Re-throw to mark job as failed in BullMQ
+}
 
 const bingScraper = createWorker(async (job) => {
   const { keywordId, notiId } = job.data;
@@ -25,11 +134,10 @@ const bingScraper = createWorker(async (job) => {
     throw new Error(`Keyword with ID ${keywordId} not found.`);
   }
 
-  // Update keyword status to 'In Progress'
-  await prisma.keyword.update({
-    where: { id: keywordId },
-    data: { status: 'IN_PROGRESS' },
-  });
+  await updateKeywordAndSaveScrapeAttempt(
+    { id: keywordId, status: 'IN_PROGRESS' },
+    null,
+  );
 
   await notiQueue.add('noti', {
     notiId,
@@ -37,72 +145,21 @@ const bingScraper = createWorker(async (job) => {
     data: { id: keywordId, status: 'IN_PROGRESS' },
   });
 
-  let browser, page;
+  let browser: Browser | null = null;
+  let page: Page | null = null;
   try {
-    const launchOptions: any = { 
-      args: [
-        '--no-sandbox', 
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-      ],
-      headless: 'new' 
-    };
+    ({ browser, page } = await initializeBrowserAndPage());
+    console.log('Browser launched and page created');
 
-    const proxy = getRandomProxy();
-    if (proxy) {
-      launchOptions.args.push(`--proxy-server=${proxy.split('@')[1]}`); // Extract host:port
-    }
+    const html = await performBingSearch(page, keywordRecord.text);
+    console.log('Navigated to Bing search URL and got HTML');
 
-    browser = await puppeteer.launch(launchOptions);
-    console.log('Browser launched')
+    const { totalAds, totalLinks } = parseBingResults(html);
 
-    page = await browser.newPage();
-    console.log('Page created')
-
-    page.setDefaultTimeout(30_000);
-    page.setDefaultNavigationTimeout(30_000);
-
-    if (proxy && proxy.includes('@')) {
-      const [username, password] = proxy.split('//')[1].split('@')[0].split(':');
-      await page.authenticate({ username, password });
-    }
-
-    // Set random user-agent
-    await page.setUserAgent(getRandomUserAgent());
-
-    // Navigate to Bing search URL
-    const searchUrl = `${env.BING_SEARCH_URL}${encodeURIComponent(keywordRecord.text)}`;
-    await page.goto(searchUrl, { waitUntil: 'networkidle2' });
-    console.log('Navigated to Bing search URL')
-
-    // Extract HTML
-    const html = await page.content();
-    const $ = cheerio.load(html);
-
-    // Basic parsing
-    const totalAds = $('.sb_add, .ads, .b_ad, [data-bm]').length; // Count elements with ad-related classes or attributes
-    const totalLinks = $('a').length; // Count all <a> tags on the page
-
-    // Update keyword status and save scrape attempt within a transaction
-    let scrapeAttempt: any;
-
-    await prisma.$transaction(async (tx) => {
-      await tx.keyword.update({
-        where: { id: keywordId },
-        data: { status: 'COMPLETED' },
-      });
-
-      scrapeAttempt = await tx.scrapeAttempt.create({
-        data: {
-          keywordId: keywordId,
-          html,
-          adCount: totalAds,
-          linkCount: totalLinks,
-          status: 'SUCCESS',
-        },
-      });
-    });
+    const scrapeAttempt = await updateKeywordAndSaveScrapeAttempt(
+      { id: keywordId, status: 'COMPLETED' },
+      { html, adCount: totalAds, linkCount: totalLinks, status: 'SUCCESS' },
+    );
 
     await notiQueue.add('noti', {
       notiId,
@@ -118,89 +175,16 @@ const bingScraper = createWorker(async (job) => {
 
     console.log(`Finished job ${job.id} for keyword ${keywordId}. Ads: ${totalAds}, Links: ${totalLinks}`);
   } catch (error: any) {
-    console.error(`Job ${job.id} for keyword ${keywordId} failed:`, error);
-
-    if (job.attemptsMade + 1 >= job.opts.attempts) { // Check if all retries are exhausted
-      console.log(`Job ${job?.id} for keyword ${job.data.keywordId} permanently failed after ${job.attemptsMade + 1} attempts.`);
-
-      let scrapeAttempt: any;
-
-      await prisma.$transaction(async (tx) => {
-        await tx.keyword.update({
-          where: { id: keywordId },
-          data: { status: 'FAILED' },
-        });
-
-        scrapeAttempt = await tx.scrapeAttempt.create({
-          data: {
-            keywordId: keywordId,
-            html: '',
-            adCount: 0,
-            linkCount: 0,
-            status: 'FAILED',
-            error: error.message,
-          },
-        });
-      });
-
-      await notiQueue.add('noti', {
-        notiId,
-        eventType: 'keyword_update',
-        data: { id: keywordId, status: 'FAILED' },
-      });
-
-      await notiQueue.add('noti', {
-        notiId,
-        eventType: 'scrape_attempt_create',
-        data: { ...scrapeAttempt, keywordId: keywordId },
-      });
-    }
-    else {
-      console.log(`Job ${job.id} for keyword ${job.data.keywordId} failed. Retrying...`);
-
-      let scrapeAttempt: any;
-
-      await prisma.$transaction(async (tx) => {
-        await tx.keyword.update({
-          where: { id: keywordId },
-          data: { status: 'PENDING' },
-        });
-
-        scrapeAttempt = await tx.scrapeAttempt.create({
-          data: {
-            keywordId: keywordId,
-            html: '',
-            adCount: 0,
-            linkCount: 0,
-            status: 'FAILED',
-            error: error.message,
-          },
-        });
-      });
-
-      await notiQueue.add('noti', {
-        notiId,
-        eventType: 'keyword_update',
-        data: { id: keywordId, status: 'PENDING' },
-      });
-
-      await notiQueue.add('noti', {
-        notiId,
-        eventType: 'scrape_attempt_create',
-        data: { ...scrapeAttempt, keywordId: keywordId },
-      });
-    }
-
-    throw error; // Re-throw to mark job as failed in BullMQ
+    await handleScrapeFailure(job, keywordId, error, notiId);
   } finally {
     await page?.close({ runBeforeUnload: false });
-    console.log('Page closed')
+    console.log('Page closed');
 
     await browser?.close();
-    console.log('Browser closed')
+    console.log('Browser closed');
   }
 
-  console.log('Job completed')
+  console.log('Job completed');
 });
 
 bingScraper.on('active', (job) => {
