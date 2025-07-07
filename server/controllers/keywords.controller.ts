@@ -59,7 +59,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     res.status(202).json({ message: 'Keywords accepted for processing', count: createdKeywords.length });
 
     // Enqueue jobs in the background without awaiting to prevent request timeouts
-    enqueueScrapingJobs(createdKeywords.map(k => k.id), req.uid!);
+    enqueueScrapingJobs(createdKeywords.map((k: { id: string }) => k.id), req.uid!);
   } catch (error) {
     console.error('Error processing CSV file.', error);
     res.status(500).send('Error processing CSV file.');

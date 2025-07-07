@@ -17,7 +17,7 @@ export const getApiKeysCtrl = async (req: Request, res: Response) => {
     });
 
     // Return partial keys for security
-    keys.forEach(k => {
+    keys.forEach((k: { key: string }) => {
       k.key = `${k.key.substring(0, 8)}...${k.key.substring(k.key.length - 4)}`
     });
 
