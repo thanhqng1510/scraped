@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { authMiddleware } from '../../middleware/auth';
+import { authMiddleware } from '../../middleware/auth.middleware';
 import jwt from 'jsonwebtoken';
 import prisma from '../../lib/prisma';
 import { env } from '../../env';

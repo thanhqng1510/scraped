@@ -12,7 +12,7 @@ loadProxies();
 puppeteer.use(StealthPlugin());
 console.log('Worker started');
 
-const worker = createWorker(async (job) => {
+const bingScraper = createWorker(async (job) => {
   const { keywordId, notiId } = job.data;
   console.log(`Processing job ${job.id} for keyword ${keywordId}`);
 
@@ -203,50 +203,50 @@ const worker = createWorker(async (job) => {
   console.log('Job completed')
 });
 
-worker.on('active', (job) => {
+bingScraper.on('active', (job) => {
   console.log(`Job ${job.id} is active.`);
 });
 
-worker.on('closing', (msg) => {
+bingScraper.on('closing', (msg) => {
   console.log('Worker closing:', msg);
 });
 
-worker.on('closed', () => {
+bingScraper.on('closed', () => {
   console.log('Worker closed.');
 });
 
-worker.on('completed', (job, res) => {
+bingScraper.on('completed', (job, res) => {
   console.log(`Job ${job.id} completed with result:`, res);
 });
 
-worker.on('drained', () => {
+bingScraper.on('drained', () => {
   console.log('Worker drained.');
 });
 
-worker.on('failed', (job, err) => {
+bingScraper.on('failed', (job, err) => {
   console.error(`Job ${job?.id} failed:`, err);
 });
 
-worker.on('error', (err) => {
+bingScraper.on('error', (err) => {
   console.error('Worker error:', err);
 });
 
-worker.on('ioredis:close', () => {
+bingScraper.on('ioredis:close', () => {
   console.log('IORedis connection closed.');
 });
 
-worker.on('paused', () => {
+bingScraper.on('paused', () => {
   console.log('Worker paused.');
 });
 
-worker.on('ready', () => {
+bingScraper.on('ready', () => {
   console.log('Worker is ready.');
 });
 
-worker.on('resumed', () => {
+bingScraper.on('resumed', () => {
   console.log('Worker resumed.');
 });
 
-worker.on('stalled', () => {
+bingScraper.on('stalled', () => {
   console.log('Worker stalled.');
 });

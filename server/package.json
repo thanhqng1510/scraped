@@ -18,8 +18,8 @@
     "dev": "concurrently \"ts-node-dev --respawn --transpile-only index.ts\" \"npm run worker:dev\" \"npm run worker:dev\"",
     "build": "tsc",
     "start": "concurrently \"node dist/index.js\" \"npm run worker:start\" \"npm run worker:start\"",
-    "worker:dev": "ts-node-dev --respawn --transpile-only worker/worker.ts",
-    "worker:start": "node dist/worker/worker.js",
+    "worker:dev": "ts-node-dev --respawn --transpile-only scrapers/bing-scraper.ts",
+    "worker:start": "node dist/scrapers/bing-scrapper.js",
     "test": "jest"
   },
   "dependencies": {
