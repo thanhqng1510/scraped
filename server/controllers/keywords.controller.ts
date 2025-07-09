@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-import csv from 'csv-parser';
-import { Readable } from 'stream';
+import { parseKeywordsFromCsv } from '../lib/csv-parser';
 import prisma from '../lib/prisma';
 import { enqueueScrapingJobs } from '../lib/scrape.queue';
 
@@ -10,34 +9,9 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
     return;
   }
 
-  const bufferStream = new Readable();
-  bufferStream.push(req.file.buffer);
-  bufferStream.push(null);
-  const keywords: string[] = [];
-
   try {
-    await new Promise<void>((resolve, reject) => {
-      bufferStream
-        .pipe(csv())
-        .on('data', (row) => {
-          // Assuming the CSV has a header like 'keyword'
-          if (row.keyword) {
-            keywords.push(row.keyword);
-          }
-        })
-        .on('end', resolve)
-        .on('error', reject);
-    });
-
-    if (keywords.length === 0) {
-      res.status(400).send('No keywords found in the CSV file.');
-      return;
-    }
-
-    if (keywords.length > 100) {
-      res.status(400).send('CSV file contains too many keywords. Maximum allowed is 100.');
-      return;
-    }
+    const MAX_KEYWORDS = 100;
+    const keywords = await parseKeywordsFromCsv(req.file.buffer, MAX_KEYWORDS);
 
     // Associate keywords with the authenticated user
     const uid = req.uid!;
