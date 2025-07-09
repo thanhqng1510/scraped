@@ -55,7 +55,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
 
     if (!uid) {
-      res.status(401).json({ message: 'Invalid credentials.' });
+      res.status(401).json({ message: 'Authentication failed: Invalid token.' });
       return;
     }
 
