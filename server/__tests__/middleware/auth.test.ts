@@ -128,7 +128,7 @@ describe('authMiddleware', () => {
         select: { userId: true, expiresAt: true },
       });
       expect(mockResponse.status).toHaveBeenCalledWith(401);
-      expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Invalid credentials.' });
+      expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Authentication failed: Invalid token.' });
       expect(nextFunction).not.toHaveBeenCalled();
     });
 
@@ -146,7 +146,7 @@ describe('authMiddleware', () => {
         select: { userId: true, expiresAt: true },
       });
       expect(mockResponse.status).toHaveBeenCalledWith(401);
-      expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Invalid credentials.' });
+      expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Authentication failed: Invalid token.' });
       expect(nextFunction).not.toHaveBeenCalled();
     });
 
