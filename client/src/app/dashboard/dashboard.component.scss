@@ -60,12 +60,22 @@
   margin-top: var.$spacing-sm;
   padding: var.$spacing-sm;
   border-radius: 5px;
-  background-color: color.adjust(var.$success-color, $lightness: 30%);
-  color: color.adjust(var.$success-color, $lightness: -20%);
-  border: 1px solid color.adjust(var.$success-color, $lightness: 20%);
   width: 100%;
   max-width: 900px;
   text-align: center;
+  border: 1px solid;
+
+  &.success {
+    background-color: color.adjust(var.$success-color, $lightness: 40%);
+    color: color.adjust(var.$success-color, $lightness: -20%);
+    border-color: color.adjust(var.$success-color, $lightness: 20%);
+  }
+
+  &.error {
+    background-color: color.adjust(var.$danger-color, $lightness: 40%);
+    color: color.adjust(var.$danger-color, $lightness: -20%);
+    border-color: color.adjust(var.$danger-color, $lightness: 20%);
+  }
 }
 
 .search-container {
