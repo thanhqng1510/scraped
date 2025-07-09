@@ -1,19 +1,49 @@
 <div class="auth-container">
-  <h2>Login / Sign Up</h2>
-  <form (ngSubmit)="false">
-    <div class="form-group">
-      <label for="email">Email:</label>
-      <input type="email" id="email" [(ngModel)]="email" name="email" required>
-    </div>
-    <div class="form-group">
-      <label for="password">Password:</label>
-      <input type="password" id="password" [(ngModel)]="password" name="password" required>
-    </div>
-    <div class="button-group">
-      <button type="button" (click)="onLogin()" [disabled]="isLoading">Login</button>
-      <button type="button" (click)="onSignup()" [disabled]="isLoading">Sign Up</button>
-    </div>
-    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
-  </form>
+  <div class="auth-form-container" *ngIf="formMode === 'login'">
+    <h2>Login</h2>
+    <form (ngSubmit)="onLogin()">
+      <div class="form-group">
+        <label for="login-email">Email:</label>
+        <input type="email" id="login-email" [(ngModel)]="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password:</label>
+        <input type="password" id="login-password" [(ngModel)]="password" name="password" required>
+      </div>
+      <div class="button-group">
+        <button type="submit" [disabled]="isLoading">Login</button>
+      </div>
+      <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <p class="switch-form">
+        Don't have an account? <a href="#" (click)="switchMode('signup'); $event.preventDefault()">Sign up</a>
+      </p>
+    </form>
+  </div>
+
+  <div class="auth-form-container" *ngIf="formMode === 'signup'">
+    <h2>Sign Up</h2>
+    <form (ngSubmit)="onSignup()">
+      <div class="form-group">
+        <label for="signup-email">Email:</label>
+        <input type="email" id="signup-email" [(ngModel)]="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="signup-password">Password:</label>
+        <input type="password" id="signup-password" [(ngModel)]="password" name="password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm-password">Confirm Password:</label>
+        <input type="password" id="confirm-password" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+      </div>
+      <div class="button-group">
+        <button type="submit" [disabled]="isLoading">Sign Up</button>
+      </div>
+      <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <p class="switch-form">
+        Already have an account? <a href="#" (click)="switchMode('login'); $event.preventDefault()">Login</a>
+      </p>
+    </form>
+  </div>
+
   <app-loading *ngIf="isLoading"></app-loading>
 </div>

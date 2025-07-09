@@ -15,10 +15,20 @@ import { AuthService } from '../services/auth.service';
 export class AuthComponent {
   email!: string;
   password!: string;
+  confirmPassword!: string;
   errorMessage: string | null = null;
   isLoading: boolean = false;
+  formMode: 'login' | 'signup' = 'login';
 
   constructor(private authService: AuthService, private router: Router) { }
+
+  switchMode(mode: 'login' | 'signup') {
+    this.formMode = mode;
+    this.email = '';
+    this.password = '';
+    this.confirmPassword = '';
+    this.errorMessage = null;
+  }
 
   async onLogin() {
     this.isLoading = true;
@@ -35,6 +45,11 @@ export class AuthComponent {
   }
 
   async onSignup() {
+    if (this.password !== this.confirmPassword) {
+      this.errorMessage = "Passwords do not match.";
+      return;
+    }
+    
     this.isLoading = true;
     this.errorMessage = null;
     try {

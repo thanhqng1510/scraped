@@ -22,6 +22,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   selectedFile: File | null = null;
   uploadMessage: string | null = null;
+  uploadMessageType: 'success' | 'error' = 'success';
   fileInput: HTMLInputElement | null = null;
 
   keywords: Keyword[] = [];
@@ -123,6 +124,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   async uploadFile() {
     if (!this.selectedFile) {
       this.uploadMessage = 'Please select a file first.';
+      this.uploadMessageType = 'error';
       return;
     }
 
@@ -134,6 +136,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     try {
       const response: any = await firstValueFrom(this.http.post('/api/v1/keywords/upload', formData));
       this.uploadMessage = `Upload successful: ${response.count} keywords processed.`;
+      this.uploadMessageType = 'success';
       this.selectedFile = null;
       if (this.fileInput) {
         this.fileInput.value = ''; // Clear the file input
@@ -143,6 +146,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.keywordService.setSearchTerm(this.searchTerm); // Refresh keyword list after upload
     } catch (error: any) {
       this.uploadMessage = `Upload failed: ${error.error.message || error.message}`;
+      this.uploadMessageType = 'error';
     } finally {
       this.isLoading = false;
     }

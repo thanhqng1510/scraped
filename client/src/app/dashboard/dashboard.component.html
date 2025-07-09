@@ -14,7 +14,7 @@
     <button (click)="performSearch()">Search</button>
   </div>
 
-  <div *ngIf="uploadMessage" class="upload-message">{{ uploadMessage }}</div>
+  <div *ngIf="uploadMessage" class="upload-message" [ngClass]="{'success': uploadMessageType === 'success', 'error': uploadMessageType === 'error'}">{{ uploadMessage }}</div>
 
   <div class="keyword-list-container">
     <h2>Your Keywords ({{ totalKeywords }})</h2>
