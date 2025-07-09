@@ -52,29 +52,40 @@ export class AuthService {
   }
 
   private handleAuthError(error: any): Error {
-    console.error("Authentication error:", error);
-    let errorMessage = 'An unknown error occurred.';
+    console.error('Authentication error:', error);
+    let errorMessage = 'An unknown error occurred. Please try again.';
+
     switch (error.code) {
       case 'auth/invalid-email':
-        errorMessage = 'Invalid email address.';
+        errorMessage = 'The email address is not valid. Please check the format.';
         break;
       case 'auth/user-disabled':
-        errorMessage = 'User account has been disabled.';
+        errorMessage = 'This user account has been disabled.';
         break;
       case 'auth/user-not-found':
-        errorMessage = 'User not found.';
+        errorMessage = 'No user found with this email. Please sign up first.';
         break;
       case 'auth/wrong-password':
-        errorMessage = 'Wrong password.';
+        errorMessage = 'Incorrect password. Please try again.';
         break;
       case 'auth/email-already-in-use':
-        errorMessage = 'Email already in use.';
+        errorMessage = 'This email address is already in use by another account.';
         break;
       case 'auth/weak-password':
-        errorMessage = 'Password is too weak.';
+        errorMessage = 'The password is too weak. It must be at least 6 characters long.';
+        break;
+      case 'auth/invalid-credential':
+        errorMessage = 'The credentials provided are invalid. Please check your email and password.';
         break;
       default:
-        errorMessage = error.message || errorMessage;
+        // Attempt to extract a cleaner message from the default error
+        const message = error.message || '';
+        if (message.includes('(')) {
+          errorMessage = message.substring(0, message.indexOf('(')).trim();
+        } else {
+          errorMessage = message;
+        }
+        break;
     }
     return new Error(errorMessage);
   }
