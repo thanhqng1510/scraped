@@ -3,6 +3,8 @@ import { parseKeywordsFromCsv } from '../lib/csv-parser';
 import prisma from '../lib/prisma';
 import { enqueueScrapingJobs } from '../lib/scrape.queue';
 
+const MAX_UPLOADED_KEYWORDS = 100;
+
 export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
   if (!req.file) {
     res.status(400).send('No file uploaded.');
@@ -10,8 +12,7 @@ export const uploadKeywordsCtrl = async (req: Request, res: Response) => {
   }
 
   try {
-    const MAX_KEYWORDS = 100;
-    const keywords = await parseKeywordsFromCsv(req.file.buffer, MAX_KEYWORDS);
+    const keywords = await parseKeywordsFromCsv(req.file.buffer, MAX_UPLOADED_KEYWORDS);
 
     // Associate keywords with the authenticated user
     const uid = req.uid!;
