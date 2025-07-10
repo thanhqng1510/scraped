@@ -140,8 +140,7 @@ For server-to-server communication or scripts. These are long-lived tokens that 
 
 1.  **Proxy Rotation:** Integrate with a proxy provider. For each request, a new IP address will be used.
 2.  **User-Agent Rotation:** Maintain a list of real-world browser user-agents (Chrome, Firefox, Safari on Desktop/Mobile). A random one will be sent with each request.
-3.  **Request Throttling & Jitter:** Introduce a small, random delay (1-3 seconds) between requests from the same worker to mimic human browsing patterns.
-4.  **Error Handling:**
+3.  **Error Handling:**
     *   For every attempt (including retries), a `ScrapeAttempt` record is created. A failed attempt will have its error message and status stored in this record.
     *   A retry mechanism exponential backoff is used via BullMQ. The job will be re-enqueued for another attempt.
     *   After 10 retries, if all attempts have failed, the parent `Keyword` status will be marked as `failed` in the database.
